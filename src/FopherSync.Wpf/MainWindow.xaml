@@ -1,0 +1,865 @@
+<Window x:Class="FopherSync.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tb="clr-namespace:H.NotifyIcon;assembly=H.NotifyIcon.Wpf"
+        Title="FopherSync" Height="780" Width="1180"
+        MinWidth="820" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource BgDarkestBrush}"
+        Closing="OnWindowClosing">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- System Tray Icon Definition -->
+        <tb:TaskbarIcon x:Name="MyTaskbarIcon"
+                        ToolTipText="FopherSync"
+                        TrayLeftMouseDoubleClick="OnTrayDoubleClicked">
+            <tb:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Open Dashboard" Click="OnTrayOpenClick" FontWeight="SemiBold" />
+                    <MenuItem Header="Run All Scheduled Jobs" Click="OnTrayRunAllClick" />
+                    <Separator />
+                    <MenuItem Header="Exit FopherSync" Click="OnTrayExitClick" />
+                </ContextMenu>
+            </tb:TaskbarIcon.ContextMenu>
+        </tb:TaskbarIcon>
+
+        <!-- Top Navigation Bar -->
+        <Border Grid.Row="0" Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="16,8,16,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: App Brand & Mascot -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Image x:Name="ImgBrandLogo" Source="Assets/app_icon.png" Width="26" Height="26" Margin="0,0,8,0" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock Text="FopherSync" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Center-Left: Navigation Tabs -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0" ClipToBounds="True">
+                    <RadioButton x:Name="NavDashboardRadio" Content="📊  Dashboard" IsChecked="True" Checked="OnNavChanged"
+                                 GroupName="MainNav" Style="{StaticResource TopNavButtonStyle}" />
+                    <RadioButton x:Name="NavHistoryRadio" Content="📑  History &amp; Logs" Checked="OnNavChanged"
+                                 GroupName="MainNav" Style="{StaticResource TopNavButtonStyle}" />
+                    <RadioButton x:Name="NavSettingsRadio" Content="⚙️  Settings &amp; Alerts" Checked="OnNavChanged"
+                                 GroupName="MainNav" Style="{StaticResource TopNavButtonStyle}" />
+                </StackPanel>
+
+                <!-- Right: Schedule Status & Utility Buttons -->
+                <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="2,0,0,3">
+                        <Ellipse x:Name="DotSchedulerStatus" Width="7" Height="7" Fill="{DynamicResource SuccessGreenBrush}" Margin="0,0,5,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="TxtSidebarSchedulerStatus" Text="Scheduler Ready" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="⚙️ Task Scheduler" Click="OnOpenTaskSchedulerClick" Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="8,4" Margin="0,0,6,0" ToolTip="Open Windows Task Scheduler" />
+                        <Button Content="🚪 Exit" Click="OnAppQuitClick" Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="8,4" ToolTip="Exit FopherSync" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1" Margin="24,18,24,18">
+
+            <!-- VIEW 1: DASHBOARD -->
+            <Grid x:Name="DashboardView" Visibility="Visible" MaxWidth="1200" HorizontalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                    <TextBlock Text="Dashboard" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="Overview of your automated backups and system health." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Top Metrics Cards -->
+                <Grid Grid.Row="1" Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18">
+                        <StackPanel>
+                            <TextBlock Text="CONFIGURED JOBS" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock x:Name="TxtTotalJobsCount" Text="0" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource AccentBlueBrush}" Margin="0,6,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18">
+                        <StackPanel>
+                            <TextBlock Text="LAST BACKUP STATUS" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock x:Name="TxtLastRunStatus" Text="No Runs Yet" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource SuccessGreenBrush}" Margin="0,10,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="4" Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18">
+                        <StackPanel>
+                            <TextBlock Text="NEXT AUTOMATED RUN" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock x:Name="TxtNextRunStatus" Text="None Scheduled" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentBlueBrush}" Margin="0,10,0,0" />
+                            <TextBlock x:Name="TxtNextRunSubtext" Text="Catch-up enabled (wakes from sleep)" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Jobs Table Section -->
+                <Border Grid.Row="2" Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+                            <TextBlock Text="Active Backup Jobs" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="▶️ Run All Jobs Now" Click="OnRunAllJobsClick" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,10,0" Padding="14,8" />
+                                <Button Content="+ Create New Job" Click="OnCreateNewJobClick" Style="{StaticResource SecondaryButtonStyle}" Padding="14,8" />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <ListBox x:Name="DashboardJobsList" Grid.Row="1" Background="Transparent" BorderThickness="0"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="16" Margin="0,0,0,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                             <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                <TextBlock Text="{Binding SourcePath}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                                                <TextBlock Text="{Binding DestinationPath, StringFormat='➔ {0}'}" FontSize="12" Foreground="{DynamicResource AccentBlueBrush}" Margin="0,2,0,0" />
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Button Content="▶ Run Now" Tag="{Binding Id}" Click="OnRunJobNowClick" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                                                <Button Content="🔍 Simulate (What-If)" Tag="{Binding Id}" Click="OnSimulateJobClick" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" />
+                                                <Button Content="✏️ Edit" Tag="{Binding Id}" Click="OnEditJobClick" Style="{StaticResource SecondaryButtonStyle}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- VIEW 2: JOB EDITOR -->
+            <Grid x:Name="JobEditorView" Visibility="Collapsed" MaxWidth="960" HorizontalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Header with Back Button -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,20">
+                    <Button DockPanel.Dock="Left" Content="← Back to Dashboard" Click="OnCancelEditClick" 
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,16,0" VerticalAlignment="Center" Padding="12,8" FontSize="13" FontWeight="SemiBold" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="TxtEditorTitle" Text="Create Backup Job" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Configure source, destination, safety rules, and schedule inclusion." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0" />
+                    </StackPanel>
+                </DockPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,16,0">
+                        <!-- Job Name & Description -->
+                        <TextBlock Text="Job Name" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,6" />
+                        <TextBox x:Name="EdtJobName" Margin="0,0,0,16" />
+
+                        <!-- Source Path -->
+                        <TextBlock Text="Source Folder (Folder to back up)" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,6" />
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="EdtSourcePath" Grid.Column="0" />
+                            <Button Grid.Column="2" Content="Browse..." Click="OnBrowseSourceClick" Style="{StaticResource SecondaryButtonStyle}" />
+                        </Grid>
+
+                        <!-- Destination Path -->
+                        <TextBlock Text="Destination Folder (Backup target or NAS share)" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,6" />
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="EdtDestinationPath" Grid.Column="0" />
+                            <Button Grid.Column="2" Content="Browse..." Click="OnBrowseDestinationClick" Style="{StaticResource SecondaryButtonStyle}" />
+                        </Grid>
+
+                        <!-- Backup Mode Picker -->
+                        <TextBlock Text="Backup Mode" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,6" />
+                        <ComboBox x:Name="CmbBackupMode" SelectionChanged="OnBackupModeSelectionChanged" Margin="0,0,0,8" Height="36" Background="{DynamicResource BgDarkBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
+                            <ComboBoxItem Content="🛡️ Incremental (/E /XO) — Safe Default: Never deletes anything from either side" IsSelected="True" />
+                            <ComboBoxItem Content="⚠️ Mirror (/MIR) — Exact clone: Purges destination files missing from source" />
+                            <ComboBoxItem Content="📦 Move (/MOVE) — Moves files: Deletes from source after copying" />
+                        </ComboBox>
+
+                        <!-- Warning banner for Mirror/Move -->
+                        <Border x:Name="BdrDestructiveWarning" Visibility="Collapsed" Background="#2E1A1A" BorderBrush="{DynamicResource DangerRedBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,16">
+                            <TextBlock Text="⚠️ CAUTION: You selected a mode that deletes files. FopherSync safety rails will enforce empty-source aborts and drive-root blocks, but files deleted on the destination cannot be undone." Foreground="#FF8A80" TextWrapping="Wrap" />
+                        </Border>
+
+                        <!-- Safety Options -->
+                        <TextBlock Text="Safety &amp; Protection Rails" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,8,0,8" />
+                        <CheckBox x:Name="ChkAbortIfSourceEmpty" Content="Abort immediately if source is empty or unmounted (Prevents accidental destination wipe)" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,16" />
+
+                        <!-- Iterative Backups -->
+                        <TextBlock Text="Iterative Backups" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,8,0,8" />
+                        <CheckBox x:Name="ChkKeepIterations" Content="Keep older backups: before each run, save the previous backup as 'Name_YYYY-MM-DD' next to the main folder" Checked="OnKeepIterationsChanged" Unchecked="OnKeepIterationsChanged" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                        <StackPanel x:Name="PanelIterationOptions" Margin="24,0,0,6" Visibility="Collapsed">
+                            <RadioButton x:Name="RdoUseGlobalRetention" GroupName="JobRetention" Content="Use the global default number of backups to keep" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,6" />
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <RadioButton x:Name="RdoCustomRetention" GroupName="JobRetention" Content="Keep this many for this job:" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,8,0" />
+                                <TextBox x:Name="EdtJobRetentionCount" Text="5" Width="50" Height="28" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="Note: each run first copies the existing backup, so you need roughly (N + 1) times the backup size free at the destination, and runs take longer. The oldest archives beyond N are deleted automatically." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Border Height="10" />
+
+
+                        <!-- Schedule Inclusion -->
+                        <TextBlock Text="Automated Schedule Inclusion" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,8,0,8" />
+                        <CheckBox x:Name="ChkEnableSchedule" Content="Include this job in the automated daily schedule" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,6" />
+                        <TextBlock Text="The daily run time (e.g. 02:00 AM), sleep, and wake options are configured globally in 'Settings &amp; Alerts'." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,16" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Editor Action Buttons -->
+                <DockPanel Grid.Row="2" Margin="0,16,0,0">
+                    <Button x:Name="BtnDeleteJob" Content="🗑️ Delete Job" Click="OnDeleteJobClick" Style="{StaticResource SecondaryButtonStyle}" Foreground="{DynamicResource DangerRedBrush}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancel" Click="OnCancelEditClick" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0" />
+                        <Button Content="💾 Save Backup Job" Click="OnSaveJobClick" Style="{StaticResource PrimaryButtonStyle}" />
+                    </StackPanel>
+                </DockPanel>
+            </Grid>
+
+            <!-- VIEW 3: HISTORY & LIVE LOGS -->
+            <Grid x:Name="HistoryView" Visibility="Collapsed" MaxWidth="1200" HorizontalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Run History &amp; Logs" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock x:Name="TxtHistorySubtitle" Text="Audit past backup runs and inspect live RoboCopy console output." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <ProgressBar x:Name="PrgRunningStatus" IsIndeterminate="True" Width="120" Height="6" Margin="0,0,12,0" Visibility="Collapsed" />
+                        <Button x:Name="BtnCancelJob" Content="⏹️ Stop Backup" Click="OnCancelJobClick" Style="{StaticResource SecondaryButtonStyle}" Foreground="{DynamicResource DangerRedBrush}" Visibility="Collapsed" />
+                    </StackPanel>
+                </DockPanel>
+
+                <!-- Sub-tab pill switcher -->
+                <Border Grid.Row="1" Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="4" HorizontalAlignment="Left" Margin="0,0,0,16">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="TabHistoryAuditRadio" Content="🕒 Past Runs (Audit)" IsChecked="True" Checked="OnHistorySubTabChanged" Style="{StaticResource SubTabRadioStyle}" Margin="0,0,4,0" />
+                        <RadioButton x:Name="TabHistoryConsoleRadio" Content="💻 Live Terminal Console" Checked="OnHistorySubTabChanged" Style="{StaticResource SubTabRadioStyle}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Panel 1: Past Runs Audit View -->
+                <Grid x:Name="PanelHistoryAudit" Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Filter Bar -->
+                    <Border Grid.Row="0" Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,14">
+                        <DockPanel>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="Time Range:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <ComboBox x:Name="CmbHistoryTimeFilter" SelectionChanged="OnHistoryFilterChanged" Width="160" Height="32" Margin="0,0,16,0">
+                                    <ComboBoxItem Content="📅 Last 7 Days" IsSelected="True" />
+                                    <ComboBoxItem Content="⏱️ Last 24 Hours" />
+                                    <ComboBoxItem Content="🗓️ Last 30 Days" />
+                                    <ComboBoxItem Content="📜 All Time" />
+                                </ComboBox>
+
+                                <TextBlock Text="Filter Job:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <ComboBox x:Name="CmbHistoryJobFilter" SelectionChanged="OnHistoryFilterChanged" Width="180" Height="32" Margin="0,0,12,0" />
+
+                                <Button Content="🔄 Refresh" Click="OnRefreshHistoryClick" Style="{StaticResource SecondaryButtonStyle}" Height="32" Padding="10,0" Margin="0,0,8,0" />
+                                <Button Content="📂 Open Logs Folder" Click="OnOpenLogsFolderClick" Style="{StaticResource SecondaryButtonStyle}" Height="32" Padding="10,0" />
+                            </StackPanel>
+
+                            <TextBlock x:Name="TxtHistoryCount" Text="0 runs recorded" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Runs List -->
+                    <Grid Grid.Row="1">
+                        <!-- Empty State -->
+                        <Border x:Name="BdrHistoryEmptyState" Visibility="Collapsed" Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="40" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="📋" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                                <TextBlock Text="No backup runs found for this time range" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,6" />
+                                <TextBlock Text="Scheduled or manual runs will automatically appear here." Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <ListBox x:Name="HistoryRunsList" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Status Badge -->
+                                            <Border Grid.Column="0" Background="{Binding StatusBadgeBackground}" CornerRadius="6" Padding="10,6" VerticalAlignment="Top" Margin="0,0,14,0" MinWidth="90">
+                                                <TextBlock Text="{Binding StatusBadgeText}" Foreground="{Binding StatusBadgeForeground}" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" />
+                                            </Border>
+
+                                            <!-- Middle Details -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                    <TextBlock Text="{Binding JobName}" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,12,0" />
+                                                    <TextBlock Text="{Binding FormattedStartTime}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                </StackPanel>
+
+                                                <TextBlock Text="{Binding ExitSummary}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,6" TextTrimming="CharacterEllipsis" />
+
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Duration: " Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+                                                    <TextBlock Text="{Binding FormattedDuration}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11" Margin="0,0,14,0" />
+
+                                                    <TextBlock Text="Copied: " Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+                                                    <TextBlock Text="{Binding FilesCopied, StringFormat='{}{0:N0} files'}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11" Margin="0,0,14,0" />
+
+                                                    <TextBlock Text="Transferred: " Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+                                                    <TextBlock Text="{Binding FormattedTransferred}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11" Margin="0,0,14,0" />
+
+                                                    <TextBlock Text="Errors: " Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+                                                    <TextBlock Text="{Binding ErrorCount}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11" />
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Right: View Log Button -->
+                                            <Button Grid.Column="2" Content="📄 Open Log" Tag="{Binding LogFilePath}" Click="OnViewRunLogClick" Style="{StaticResource SecondaryButtonStyle}" VerticalAlignment="Center" Margin="12,0,0,0" Padding="12,6" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+
+                <!-- Panel 2: Live Console View -->
+                <Grid x:Name="PanelHistoryConsole" Grid.Row="2" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                        <TextBlock Text="Real-Time Process Stream" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" FontSize="12" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="📂 Open Logs Folder" Click="OnOpenLogsFolderClick" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" Padding="10,4" />
+                            <Button Content="Clear Console" Click="OnClearConsoleClick" Style="{StaticResource SecondaryButtonStyle}" Padding="10,4" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <Border Grid.Row="1" Background="#0C0C0E" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
+                        <TextBox x:Name="TxtConsoleLog" IsReadOnly="True" Background="Transparent" Foreground="#A3E635"
+                                 FontFamily="Consolas, Cascadia Code, monospace" FontSize="12" BorderThickness="0"
+                                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- VIEW 4: SETTINGS & ALERTS -->
+            <Grid x:Name="SettingsView" Visibility="Collapsed" MaxWidth="960" HorizontalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                    <TextBlock Text="Settings &amp; Multi-Channel Alerts" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="Configure automated schedule, remote power, alert channels, and system options." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+
+                    <!-- Sub-Tab Pill Switcher -->
+                    <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="4" HorizontalAlignment="Left" Margin="0,14,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="TabSettingsScheduleRadio" Content="🗓️   Schedule &amp; Power" IsChecked="True" Checked="OnSettingsSubTabChanged" Style="{StaticResource SubTabRadioStyle}" Margin="0,0,4,0" />
+                            <RadioButton x:Name="TabSettingsAlertsRadio" Content="🔔   Alerts &amp; Notifications" Checked="OnSettingsSubTabChanged" Style="{StaticResource SubTabRadioStyle}" Margin="0,0,4,0" />
+                            <RadioButton x:Name="TabSettingsGeneralRadio" Content="⚙️   General &amp; About" Checked="OnSettingsSubTabChanged" Style="{StaticResource SubTabRadioStyle}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,16,0">
+
+                        <!-- ============================================== -->
+                        <!-- SUB-TAB 1: SCHEDULE & POWER                   -->
+                        <!-- ============================================== -->
+                        <StackPanel x:Name="PanelSettingsSchedule" Visibility="Visible">
+                            <!-- Global Automated Schedule & Power Management -->
+                            <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,10">
+                                        <TextBlock Text="🗓️  Global Automated Schedule &amp; Power Management" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <CheckBox x:Name="ChkGlobalScheduleEnabled" Content="Enable Daily Schedule" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" />
+                                    </DockPanel>
+                                    <TextBlock Text="Sequentially runs all jobs marked as 'Include in automated daily schedule'. Windows Task Scheduler wakes the PC at your chosen time, executes each job without disk thrashing, sends alerts, and can put the PC back to sleep." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,14" TextWrapping="Wrap" />
+
+                                    <!-- Timezone Selection -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14" VerticalAlignment="Center">
+                                        <TextBlock Text="Timezone:" VerticalAlignment="Center" Margin="0,0,12,0" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <ComboBox x:Name="CmbTimeZone" SelectionChanged="OnTimeZoneSelectionChanged" Width="430" Height="36" VerticalContentAlignment="Center" Background="{DynamicResource BgDarkBrush}" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14" VerticalAlignment="Center">
+                                        <TextBlock Text="Run Daily at:" VerticalAlignment="Center" Margin="0,0,12,0" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                                        <!-- Hour (12h) -->
+                                        <ComboBox x:Name="CmbSchedHour" SelectionChanged="OnSchedTimeChanged" Width="72" Height="36" VerticalContentAlignment="Center" Background="{DynamicResource BgDarkBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
+                                            <ComboBoxItem Content="12" />
+                                            <ComboBoxItem Content="01" />
+                                            <ComboBoxItem Content="02" IsSelected="True" />
+                                            <ComboBoxItem Content="03" />
+                                            <ComboBoxItem Content="04" />
+                                            <ComboBoxItem Content="05" />
+                                            <ComboBoxItem Content="06" />
+                                            <ComboBoxItem Content="07" />
+                                            <ComboBoxItem Content="08" />
+                                            <ComboBoxItem Content="09" />
+                                            <ComboBoxItem Content="10" />
+                                            <ComboBoxItem Content="11" />
+                                        </ComboBox>
+
+                                        <TextBlock Text=":" VerticalAlignment="Center" FontWeight="Bold" FontSize="18" Margin="6,0,6,0" Foreground="{DynamicResource TextSecondaryBrush}" />
+
+                                        <!-- Minute (00-59) -->
+                                        <ComboBox x:Name="CmbSchedMinute" SelectionChanged="OnSchedTimeChanged" Width="72" Height="36" VerticalContentAlignment="Center" Background="{DynamicResource BgDarkBrush}" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                                        <!-- AM / PM -->
+                                        <ComboBox x:Name="CmbSchedAmPm" SelectionChanged="OnSchedTimeChanged" Width="76" Height="36" VerticalContentAlignment="Center" Margin="8,0,0,0" Background="{DynamicResource BgDarkBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
+                                            <ComboBoxItem Content="AM" IsSelected="True" />
+                                            <ComboBoxItem Content="PM" />
+                                        </ComboBox>
+
+                                        <!-- Live Preview Badge -->
+                                        <TextBlock x:Name="TxtSchedPreview" Text="(Runs daily at 02:00 AM)" VerticalAlignment="Center" Margin="14,0,0,0" Foreground="{DynamicResource SuccessGreenBrush}" FontSize="13" FontWeight="SemiBold" />
+                                    </StackPanel>
+
+                                    <!-- Power & Wake Controls -->
+                                    <CheckBox x:Name="ChkGlobalWakeToRun" Content="⏰ Wake computer from sleep to run backup at scheduled time" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                    <CheckBox x:Name="ChkGlobalCatchupIfMissed" Content="🔄 Catch up missed backup immediately upon wake-up (if PC was asleep/off)" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                    <CheckBox x:Name="ChkGlobalSleepAfterComplete" Content="💤 Put computer to sleep when all jobs complete (with 60-second cancel countdown)" IsChecked="False" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,14" />
+
+                                    <!-- Iterative Backups / Retention (Combined with Global Schedule) -->
+                                    <Border Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="14,12" Margin="0,0,0,4">
+                                        <StackPanel>
+                                            <DockPanel Margin="0,0,0,6">
+                                                <TextBlock Text="🗂️  Iterative Backups (Previous Versions Retention)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                    <TextBlock Text="Default to keep:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                    <TextBox x:Name="EdtDefaultRetention" Text="0" Width="48" Height="26" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Background="{DynamicResource BgCardHoverBrush}" FontSize="12" />
+                                                </StackPanel>
+                                            </DockPanel>
+                                            <TextBlock Text="For jobs configured with iterative backups, previous runs are archived as 'Name_YYYY-MM-DD' before syncing. Set to 0 to keep no older versions by default (jobs can override)." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Remote Destination Server Power (Wake-on-LAN & Remote Sleep) -->
+                            <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,10">
+                                        <TextBlock Text="🌐  Remote Destination Server Power (Wake-on-LAN &amp; Sleep)" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <CheckBox x:Name="ChkRemoteWakeEnabled" Content="Enable Remote Server Power" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" />
+                                    </DockPanel>
+                                    <TextBlock Text="Automatically wake your destination server (e.g. FMC-SERVER) across the home network before backups begin, and optionally put it back to sleep after all jobs finish." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,14" TextWrapping="Wrap" />
+
+                                    <Grid Margin="0,0,0,12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="14" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Server Hostname / IP -->
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Server Hostname or IP:" Margin="0,0,0,4" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBox x:Name="EdtServerHost" Text="FMC-SERVER" Height="36" VerticalContentAlignment="Center" Padding="8,4" Background="{DynamicResource BgDarkBrush}" />
+                                        </StackPanel>
+
+                                        <!-- Server MAC Address -->
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Server MAC Address:" Margin="0,0,0,4" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBox x:Name="EdtServerMac" Text="" Height="36" VerticalContentAlignment="Center" Padding="8,4" Background="{DynamicResource BgDarkBrush}" ToolTip="Physical MAC address of the server, e.g. 00:11:22:33:44:55" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Dedicated Action Row (Neatly Contained Inside Card) -->
+                                    <Border Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,14">
+                                        <DockPanel>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="Max wait time for server to respond:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                <TextBox x:Name="EdtServerWakeWait" Text="90" Width="50" Height="28" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Background="{DynamicResource BgCardHoverBrush}" FontSize="12" />
+                                                <TextBlock Text="sec" VerticalAlignment="Center" Margin="6,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <Button x:Name="BtnAutoDetectMac" Content="🔍 Auto-Detect MAC" Click="OnAutoDetectMacClick"
+                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        Background="{DynamicResource BgCardHoverBrush}" BorderBrush="{DynamicResource AccentBlueBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"
+                                                        Height="32" Padding="12,0" ToolTip="Find MAC address from LAN network" />
+                                                <Button x:Name="BtnTestWake" Content="⚡ Test Wake" Click="OnTestWakeClick"
+                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        Background="{DynamicResource BgCardHoverBrush}" BorderBrush="{DynamicResource SuccessGreenBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"
+                                                        Height="32" Padding="12,0" ToolTip="Broadcast Wake-on-LAN Magic Packet now" />
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+
+                                    <!-- Remote Server Credentials & Pairing (WinRM / SMB) -->
+                                    <Border Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,12">
+                                        <StackPanel>
+                                            <DockPanel Margin="0,0,0,6">
+                                                <TextBlock Text="🔐  Remote Server Credentials &amp; 1-Click Pairing" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                                <TextBlock x:Name="TxtPairStatus" Text="" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" />
+                                            </DockPanel>
+                                            <TextBlock Text="Required for Workgroup remote sleep. Enter your Windows server username &amp; password, then click 'Pair Server' to automatically configure TrustedHosts and authorize sleep commands." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap" />
+
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="10" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="10" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Username -->
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Server Username:" Margin="0,0,0,4" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                    <TextBox x:Name="EdtServerUser" Height="34" VerticalContentAlignment="Center" Padding="8,4" Background="{DynamicResource BgDarkBrush}" ToolTip="e.g. Administrator or your server login account name" />
+                                                </StackPanel>
+
+                                                <!-- Password -->
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="Server Password:" Margin="0,0,0,4" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                    <PasswordBox x:Name="EdtServerPass" Height="34" VerticalContentAlignment="Center" Padding="8,4" Background="{DynamicResource BgDarkBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" ToolTip="Password for the server account" />
+                                                </StackPanel>
+
+                                                <!-- Pair Button -->
+                                                <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
+                                                    <Button x:Name="BtnPairServer" Content="🛠️ Pair Windows Server" Click="OnPairServerClick"
+                                                            Style="{StaticResource SecondaryButtonStyle}"
+                                                            Background="{DynamicResource BgCardHoverBrush}" BorderBrush="{DynamicResource AccentBlueBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"
+                                                            Height="34" Padding="14,0" ToolTip="Test connection and configure TrustedHosts authorization" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Remote Sleep Options -->
+                                    <Border Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
+                                        <StackPanel>
+                                            <CheckBox x:Name="ChkRemoteSleepEnabled" Content="💤 Put remote server to sleep when all backup jobs finish" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" Margin="0,0,0,8" />
+                                            <TextBlock Text="Optional custom sleep command (leave blank to use built-in Windows 10 Pro remote sleep):" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,4" />
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox x:Name="EdtRemoteSleepCmd" Grid.Column="0" Text="" Height="34" VerticalContentAlignment="Center" Padding="8,4" Background="{DynamicResource BgDarkBrush}" ToolTip="e.g. psshutdown.exe \\FMC-SERVER -d -t 0 (Leave blank for default Windows remote sleep)" />
+                                                <Button x:Name="BtnTestRemoteSleep" Grid.Column="2" Content="⚡ Test Sleep Signal" Click="OnTestRemoteSleepClick"
+                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        Background="{DynamicResource BgCardHoverBrush}" BorderBrush="{DynamicResource WarningAmberBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"
+                                                        Height="34" Padding="14,0" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- ============================================== -->
+                        <!-- SUB-TAB 2: ALERTS & NOTIFICATIONS (ORDER: 1. GMAIL, 2. DISCORD, 3. NTFY) -->
+                        <!-- ============================================== -->
+                        <StackPanel x:Name="PanelSettingsAlerts" Visibility="Collapsed">
+                            <!-- 1. Email / SMTP Section (FIRST) -->
+                            <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,10">
+                                        <TextBlock Text="✉️  Email (SMTP) Alerts" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <CheckBox x:Name="ChkSmtpEnabled" Content="Enable" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    </DockPanel>
+                                    <TextBlock Text="Sends backup summary reports directly to your inbox. Works with self-hosted mail servers, local LAN relays, custom domains, Gmail, Outlook, and Yahoo." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap" />
+
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="SMTP Host" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBox x:Name="EdtSmtpHost" Text="smtp.gmail.com" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Port" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBox x:Name="EdtSmtpPort" Text="587" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="4" VerticalAlignment="Bottom" Margin="0,0,0,8">
+                                            <CheckBox x:Name="ChkSmtpUseSsl" Content="Use SSL / TLS" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Email Address / Username (Optional for local relays)" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBox x:Name="EdtSmtpUser" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Password / App Password (Optional)" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <PasswordBox x:Name="EdtSmtpPass" Background="{DynamicResource BgDarkBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Height="34" BorderBrush="{DynamicResource BorderSubtleBrush}" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <TextBlock Text="Recipient Email (Where to send alerts)" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="EdtRecipientEmail" Grid.Column="0" />
+                                        <Button Grid.Column="2" Click="OnEmailHelpClick" Style="{StaticResource SecondaryButtonStyle}" ToolTip="App Password &amp; SMTP setup tutorial">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="❓" Foreground="{DynamicResource DangerRedBrush}" FontWeight="Bold" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                                <TextBlock Text="Need Help?" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Grid.Column="4" Content="Send Test Email" Click="OnTestEmailClick" Style="{StaticResource SecondaryButtonStyle}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 2. Discord Webhook Section (SECOND) -->
+                            <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,10">
+                                        <TextBlock Text="💬  Discord Webhook Alerts" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <CheckBox x:Name="ChkDiscordEnabled" Content="Enable" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    </DockPanel>
+                                    <TextBlock Text="Sends clean color-coded embed reports directly into a Discord channel." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,12" />
+
+                                    <TextBlock Text="Discord Webhook URL" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="EdtDiscordWebhook" Grid.Column="0" />
+                                        <Button Grid.Column="2" Content="Send Test Webhook" Click="OnTestDiscordClick" Style="{StaticResource SecondaryButtonStyle}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 3. ntfy.sh Section (THIRD) -->
+                            <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,10">
+                                        <TextBlock Text="📱  ntfy.sh (Phone Push Notifications)" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <CheckBox x:Name="ChkNtfyEnabled" Content="Enable" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    </DockPanel>
+                                    <TextBlock Text="Free, open source push notifications directly to your phone. Install the ntfy Android/iOS app and subscribe to your topic name." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap" />
+
+                                    <TextBlock Text="ntfy Topic (Pick a topic name, e.g. FopherSync)" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="EdtNtfyTopic" Grid.Column="0" />
+                                        <Button Grid.Column="2" Click="OnNtfyHelpClick" Style="{StaticResource SecondaryButtonStyle}" ToolTip="How to set up phone alerts with ntfy.sh">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="❓" Foreground="{DynamicResource DangerRedBrush}" FontWeight="Bold" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                                <TextBlock Text="Need Help?" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Grid.Column="4" Content="Send Test Push" Click="OnTestNtfyClick" Style="{StaticResource SecondaryButtonStyle}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- ============================================== -->
+                        <!-- SUB-TAB 3: GENERAL & ABOUT                     -->
+                        <!-- ============================================== -->
+                        <StackPanel x:Name="PanelSettingsGeneral" Visibility="Collapsed">
+                            <!-- Appearance & Theme Preferences -->
+                            <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="🎨  Appearance &amp; Theme" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,4" />
+                                    <TextBlock Text="Choose your preferred color theme. You can lock in Dark or Light mode, or follow your Windows system setting." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,14" TextWrapping="Wrap" />
+
+                                    <Border Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="4" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal">
+                                            <RadioButton x:Name="ThemeDarkRadio" Content="🌙  Dark Theme" GroupName="AppearanceTheme" Checked="OnThemeOptionChanged" Style="{DynamicResource SubTabRadioStyle}" Margin="0,0,4,0" />
+                                            <RadioButton x:Name="ThemeLightRadio" Content="☀️  Light Theme" GroupName="AppearanceTheme" Checked="OnThemeOptionChanged" Style="{DynamicResource SubTabRadioStyle}" Margin="0,0,4,0" />
+                                            <RadioButton x:Name="ThemeSystemRadio" Content="💻  System Default" GroupName="AppearanceTheme" Checked="OnThemeOptionChanged" Style="{DynamicResource SubTabRadioStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Desktop & System Tray Preferences -->
+                            <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="🖥️  Desktop &amp; System Tray Preferences" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12" />
+                                    <CheckBox x:Name="ChkMinimizeOnClose" Content="Minimize to System Tray when closing window (keeps running invisibly)" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                    <CheckBox x:Name="ChkStartMinimized" Content="Start minimized to tray on system startup" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Data Storage & Logs Directory -->
+                            <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="📂  Data Storage &amp; Logs" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                    <TextBlock Text="Configuration files, SQLite audit database, and RoboCopy execution logs are stored safely in your user profile." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,12" TextWrapping="Wrap" />
+                                    <DockPanel Background="{DynamicResource BgDarkBrush}" LastChildFill="True">
+                                        <Button DockPanel.Dock="Right" Content="📂 Open Data Folder" Click="OnOpenDataFolderClick" Style="{StaticResource SecondaryButtonStyle}" Padding="12,6" />
+                                        <TextBlock Text="%LOCALAPPDATA%\FopherSync" VerticalAlignment="Center" FontFamily="Consolas, monospace" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" Margin="12,0,12,0" />
+                                    </DockPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Unobtrusive About & Credits Section -->
+                            <Border Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                        <Image x:Name="ImgAboutLogo" Source="Assets/app_icon.png" Width="36" Height="36" Margin="0,0,12,0" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="FopherSync" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBlock Text="Version 1.0.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                                        <StackPanel>
+                                            <Grid Margin="0,0,0,7">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="230" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="• Designed &amp; Created by:" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="Fopher" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,7">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="230" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="• C.A.T. (Core Advisory Technician):" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Border CornerRadius="5" Width="22" Height="22" Margin="0,0,8,0" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1">
+                                                        <Border.Clip>
+                                                            <RectangleGeometry RadiusX="4" RadiusY="4" Rect="0,0,20,20" />
+                                                        </Border.Clip>
+                                                        <Image Source="Assets/cat_square.png" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
+                                                    </Border>
+                                                    <TextBlock Text="Pepper" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,7">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="230" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="• AI Engineering Partner:" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="Antigravity (Google DeepMind)" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,7">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="230" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="• AI Models:" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="Gemini 3.8 Flash, Claude Opus &amp; Sonnet" FontWeight="SemiBold" Foreground="{DynamicResource AccentBlueBrush}" FontSize="12" VerticalAlignment="Center" />
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,7">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="230" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="• Core Transfer Engine:" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="Microsoft RoboCopy" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Save Settings Button -->
+                <DockPanel Grid.Row="2" Margin="0,16,0,0">
+                    <Button Content="💾 Save All Settings" Click="OnSaveSettingsClick" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" />
+                </DockPanel>
+            </Grid>
+
+        </Grid>
+    </Grid>
+</Window>

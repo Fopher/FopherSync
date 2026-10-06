@@ -1,0 +1,86 @@
+<Window x:Class="FopherSync.Wpf.EmailHelpGuideWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Email &amp; App Password Setup Help" Height="640" Width="660"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{StaticResource BgDarkestBrush}"
+        BorderBrush="{StaticResource BorderSubtleBrush}"
+        BorderThickness="1"
+        ShowInTaskbar="False">
+    <Grid Margin="24,20,24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="✉️ Email &amp; App Password Setup Guide" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+            <TextBlock Text="Resolve 5.7.8 Bad Credentials errors and configure self-hosted relays." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+        </StackPanel>
+
+        <!-- Main Guide Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+            <StackPanel Margin="0,0,10,0">
+
+                <!-- Section 1: Google / Gmail -->
+                <Border Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="🔑  1. Gmail, Google Workspace &amp; Commercial Providers" FontSize="14" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,0,8" />
+                        <TextBlock Text="Google and Microsoft block your normal account password for automated SMTP apps. You must generate an App Password:" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
+
+                        <Border Background="{StaticResource BgDarkBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="• Step 1: Turn ON 2-Step Verification on your Google Account." FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+                                <TextBlock Text="• Step 2: Open Google's App Passwords page and create one named 'FopherSync'." FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+                                <TextBlock Text="• Step 3: Paste the generated 16-character code into FopherSync's Password field." FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Callout for 'Setting is not available' -->
+                        <Border Background="#2B2012" BorderBrush="{StaticResource WarningAmberBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="⚠️ If Google says 'The setting you are looking for is not available':" FontWeight="Bold" Foreground="{StaticResource WarningAmberBrush}" FontSize="12" Margin="0,0,0,4" />
+                                <TextBlock Text="Google hides the App Passwords menu until 2-Step Verification is fully verified with a working phone number. Complete SMS/Phone 2FA setup first, then reload the page." FontSize="12" Foreground="#FDE68A" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Section 2: Home-Lab / Local Relay & Ports -->
+                <Border Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="🏠  2. Self-Hosted &amp; Local Home-Lab Relays (Ports &amp; Security)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource SuccessGreenBrush}" Margin="0,0,0,8" />
+                        <TextBlock Text="If you run a local mail relay (e.g. Postfix, Mailcow, Docker container) or custom SMTP server:" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+                        <Border Background="{StaticResource BgDarkBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="• Recommended Ports: Use Port 587 (STARTTLS) or Port 465 (SSL/TLS)." FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" TextWrapping="Wrap" />
+                                <TextBlock Text="• Unauthenticated LAN: Leave Email &amp; Password BLANK only if your internal subnet is whitelisted on your relay." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Port 25 Warning -->
+                        <Border Background="#2B1616" BorderBrush="{StaticResource DangerRedBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="🚫 Avoid Port 25 (Insecure &amp; Blocked)" FontWeight="Bold" Foreground="{StaticResource DangerRedBrush}" FontSize="12" Margin="0,0,0,4" />
+                                <TextBlock Text="Do NOT use Port 25 for sending mail. It transmits traffic in plain unencrypted text and is blocked by virtually all residential ISPs to prevent spam. Always stick to encrypted Port 587 or 465." FontSize="12" Foreground="#FF8A80" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Bottom Action Bar -->
+        <DockPanel Grid.Row="2">
+            <Button Content="🌐 Open Google App Passwords Page" Click="OnOpenGoogleAppPasswordsClick"
+                    Style="{StaticResource SecondaryButtonStyle}" DockPanel.Dock="Left" Padding="14,8" />
+            <Button Content="Close" Click="OnCloseClick" IsDefault="True"
+                    Style="{StaticResource PrimaryButtonStyle}" DockPanel.Dock="Right" HorizontalAlignment="Right" Padding="20,8" MinWidth="80" />
+        </DockPanel>
+    </Grid>
+</Window>

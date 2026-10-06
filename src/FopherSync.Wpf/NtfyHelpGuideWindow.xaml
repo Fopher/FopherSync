@@ -1,0 +1,120 @@
+<Window x:Class="FopherSync.Wpf.NtfyHelpGuideWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ntfy.sh Push Notifications Setup Help" Height="650" Width="680"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{StaticResource BgDarkestBrush}"
+        BorderBrush="{StaticResource BorderSubtleBrush}"
+        BorderThickness="1"
+        ShowInTaskbar="False">
+    <Grid Margin="24,20,24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="📱 ntfy.sh Phone Push Setup Guide" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+            <TextBlock Text="Get free, instant backup alerts on your phone (Android &amp; iOS) or web browser with zero hassle." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+        </StackPanel>
+
+        <!-- Main Guide Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+            <StackPanel Margin="0,0,10,0">
+
+                <!-- Section 1: What is ntfy.sh? -->
+                <Border Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="💡  1. What is ntfy.sh?" FontSize="14" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,0,8" />
+                        <TextBlock Text="ntfy (pronounced 'notify') is a free, ultra-lightweight push notification service. Unlike email or complex webhooks, it requires no mail servers, no phone numbers, and sends instant push alerts straight to your devices." FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
+
+                        <Border Background="{StaticResource BgDarkBrush}" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="• Works everywhere: Native Android app, iOS app, and any modern web browser." FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+                                <TextBlock Text="• Free &amp; Open Source: No subscriptions or hidden costs." FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" />
+                                <TextBlock Text="• Zero spam: Only the specific topics you subscribe to can send you notifications." FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Section 2: Quick Setup -->
+                <Border Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="🚀  2. Quick Setup (Takes 60 Seconds)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource SuccessGreenBrush}" Margin="0,0,0,8" />
+                        <TextBlock Text="Follow these three easy steps to start receiving phone backup alerts:" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
+
+                        <Border Background="{StaticResource BgDarkBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="• Step 1: Install the App or Open the Webpage" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,0,2" />
+                                <TextBlock Text="  Download the free 'ntfy' app from Google Play or the Apple App Store, or simply open https://ntfy.sh in your web browser." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+                                <TextBlock Text="• Step 2: Choose a Topic &amp; Subscribe" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,0,2" />
+                                <TextBlock Text="  In the ntfy app (or website), tap the '+' button, type your topic name (for example: FopherSync), and tap 'Subscribe'." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+                                <TextBlock Text="• Step 3: Enter Topic in FopherSync &amp; Test" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,0,2" />
+                                <TextBlock Text="  In FopherSync, enter the exact same topic name into the 'ntfy Topic' field, make sure 'Enable' is checked, and click 'Send Test Push'!" FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Privacy & Topic Naming Card -->
+                        <Border Background="#1C2333" BorderBrush="{StaticResource AccentBlueBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="🔒  How to Keep Your Alerts Private" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" FontSize="13" Margin="0,0,0,6" />
+                                <TextBlock Text="On ntfy's free public server, channels don't use passwords—the topic name itself is your password. Anyone who guesses the name can view alerts." FontSize="12" Foreground="#D1D5DB" TextWrapping="Wrap" Margin="0,0,0,8" />
+
+                                <Border Background="{StaticResource BgDarkBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="• ❌ Public &amp; Guessable:  'FopherSync' or 'Backups'" FontSize="12" Foreground="#FF8A80" Margin="0,0,0,4" />
+                                        <TextBlock Text="• ✅ Private &amp; Secret:     'FopherSync-cmcha-7291'" FontSize="12" Foreground="{StaticResource SuccessGreenBrush}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Text="💡 Rule of thumb: Simply add random numbers, initials, or characters to your topic name so nobody else can guess it!" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,6" />
+
+                                <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap">
+                                    <Run Text="Want full control? Paid ntfy.sh accounts can reserve topics, or you can run your own server: " />
+                                    <Hyperlink NavigateUri="https://docs.ntfy.sh/install/" RequestNavigate="OnHyperlinkNavigate" Foreground="{StaticResource AccentBlueBrush}">
+                                        <Run Text="ntfy Self-Hosting Guide (Docker / Linux) ↗" />
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Section 3: What notifications look like -->
+                <Border Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="🔔  3. What You Will Receive" FontSize="14" FontWeight="Bold" Foreground="{StaticResource WarningAmberBrush}" Margin="0,0,0,8" />
+                        <TextBlock Text="Whenever a scheduled backup runs (or fails/aborts), FopherSync sends a phone notification with:" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+                        <Border Background="{StaticResource BgDarkBrush}" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="• Backup Status: Clear Success, Warning, or Failure indicators with color tags." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" TextWrapping="Wrap" />
+                                <TextBlock Text="• Transfer Stats: Total files copied, bytes transferred, and total execution duration." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" TextWrapping="Wrap" />
+                                <TextBlock Text="• High Priority for Errors: Failure alerts are sent with urgent priority so you know immediately if a drive is offline or full." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Bottom Action Bar -->
+        <DockPanel Grid.Row="2">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                <Button Content="🌐 Open ntfy.sh in Browser" Click="OnOpenNtfyWebClick"
+                        Style="{StaticResource SecondaryButtonStyle}" Padding="14,8" Margin="0,0,10,0" />
+                <Button Content="📖 Self-Hosting Docs" Click="OnOpenSelfHostDocsClick"
+                        Style="{StaticResource SecondaryButtonStyle}" Padding="14,8" />
+            </StackPanel>
+            <Button Content="Close" Click="OnCloseClick" IsDefault="True"
+                    Style="{StaticResource PrimaryButtonStyle}" DockPanel.Dock="Right" HorizontalAlignment="Right" Padding="20,8" MinWidth="80" />
+        </DockPanel>
+    </Grid>
+</Window>

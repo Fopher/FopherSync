@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <LangVersion>12</LangVersion>
+    <ApplicationIcon Condition="Exists('Assets\app.ico')">Assets\app.ico</ApplicationIcon>
+    <RootNamespace>FopherSync.Wpf</RootNamespace>
+    <AssemblyName>FopherSync</AssemblyName>
+    <AssemblyTitle>FopherSync</AssemblyTitle>
+    <Product>FopherSync</Product>
+    <Description>FopherSync</Description>
+    <Title>FopherSync</Title>
+    <Company>Fopher</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FopherSync.Core\FopherSync.Core.csproj" />
+    <ProjectReference Include="..\FopherSync.Notifications\FopherSync.Notifications.csproj" />
+    <ProjectReference Include="..\FopherSync.Scheduler\FopherSync.Scheduler.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\**\*" />
+    <None Update="Assets\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="PrepareAppIcon" BeforeTargets="BeforeBuild;BeforePublish">
+    <MakeDir Directories="$(MSBuildProjectDirectory)\Assets" Condition="!Exists('$(MSBuildProjectDirectory)\Assets')" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\..\..\FopherSync Icon.jpg"
+          DestinationFiles="$(MSBuildProjectDirectory)\Assets\app_icon.jpg"
+          Condition="Exists('$(MSBuildProjectDirectory)\..\..\FopherSync Icon.jpg')"
+          SkipUnchangedFiles="true" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;$src = '$(MSBuildProjectDirectory)\Assets\app_icon.jpg'; if (-not (Test-Path $src)) { $src = '$(MSBuildProjectDirectory)\..\..\FopherSync Icon.jpg' }; if (Test-Path $src) { Add-Type -AssemblyName System.Drawing; $b = [System.Drawing.Bitmap]::FromFile($src); $w = $b.Width; $h = $b.Height; $raw = New-Object System.Drawing.Bitmap($w, $h, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb); $rect = New-Object System.Drawing.Rectangle(0, 0, $w, $h); $bdSrc = $b.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::ReadOnly, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb); $bdDst = $raw.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::WriteOnly, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb); $byteCount = [Math]::Abs($bdSrc.Stride) * $h; $sBytes = New-Object byte[] $byteCount; $dBytes = New-Object byte[] $byteCount; [System.Runtime.InteropServices.Marshal]::Copy($bdSrc.Scan0, $sBytes, 0, $byteCount); for ($y = 0; $y -lt $h; $y++) { $row = $y * $bdSrc.Stride; for ($x = 0; $x -lt $w; $x++) { $i = $row + ($x * 4); $bb = [int]$sBytes[$i]; $bg = [int]$sBytes[$i+1]; $br = [int]$sBytes[$i+2]; $minC = [Math]::Min($br, [Math]::Min($bg, $bb)); $dist = 255 - $minC; if ($dist -le 12) { $dBytes[$i] = 0; $dBytes[$i+1] = 0; $dBytes[$i+2] = 0; $dBytes[$i+3] = 0; } else { $aF = [Math]::Max(0.0, [Math]::Min(1.0, ($dist - 10.0) / 195.0)); $dBytes[$i+3] = [byte][int]($aF * 255.0); $dBytes[$i+2] = [byte][Math]::Max(0, [Math]::Min(255, [int](($br - 255.0 * (1.0 - $aF)) / $aF))); $dBytes[$i+1] = [byte][Math]::Max(0, [Math]::Min(255, [int](($bg - 255.0 * (1.0 - $aF)) / $aF))); $dBytes[$i] = [byte][Math]::Max(0, [Math]::Min(255, [int](($bb - 255.0 * (1.0 - $aF)) / $aF))); } } }; [System.Runtime.InteropServices.Marshal]::Copy($dBytes, 0, $bdDst.Scan0, $byteCount); $b.UnlockBits($bdSrc); $raw.UnlockBits($bdDst); $b.Dispose(); $maxDim = [Math]::Max($w, $h); $sizes = @(256, 128, 64, 48, 32, 16); $frames = @(); foreach ($sz in $sizes) { $sq = New-Object System.Drawing.Bitmap($sz, $sz, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb); $g = [System.Drawing.Graphics]::FromImage($sq); $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic; $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality; $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality; $g.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality; $g.CompositingMode = [System.Drawing.Drawing2D.CompositingMode]::SourceCopy; $scale = $sz * 1.0 / $maxDim; $dw = [int]($w * $scale); $dh = [int]($h * $scale); $dx = [int](($sz - $dw) / 2); $dy = [int](($sz - $dh) / 2); $g.DrawImage($raw, $dx, $dy, $dw, $dh); $g.Dispose(); $ms = New-Object System.IO.MemoryStream; $sq.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png); if ($sz -eq 256) { $sq.Save('$(MSBuildProjectDirectory)\Assets\app_icon.png', [System.Drawing.Imaging.ImageFormat]::Png); } $sq.Dispose(); $frames += ,@($sz, $ms.ToArray()); $ms.Dispose(); }; $raw.Dispose(); $icoPath = '$(MSBuildProjectDirectory)\Assets\app.ico'; $bw = New-Object System.IO.BinaryWriter([System.IO.File]::Create($icoPath)); $bw.Write([UInt16]0); $bw.Write([UInt16]1); $bw.Write([UInt16]$frames.Count); $curOff = 6 + (16 * $frames.Count); foreach ($fr in $frames) { $dimByte = if ($fr[0] -eq 256) { [byte]0 } else { [byte]$fr[0] }; $bw.Write($dimByte); $bw.Write($dimByte); $bw.Write([byte]0); $bw.Write([byte]0); $bw.Write([UInt16]1); $bw.Write([UInt16]32); $bw.Write([UInt32]$fr[1].Length); $bw.Write([UInt32]$curOff); $curOff += $fr[1].Length; }; foreach ($fr in $frames) { $bw.Write($fr[1]); }; $bw.Close(); try { $sh = New-Object -ComObject WScript.Shell; @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('CommonDesktopDirectory'), [Environment]::GetFolderPath('Programs')) | ForEach-Object { if (Test-Path $_) { Get-ChildItem -Path $_ -Filter '*.lnk' | ForEach-Object { try { $sc = $sh.CreateShortcut($_.FullName); if ($sc.TargetPath -like '*FopherSync*' -or $_.Name -like '*FopherSync*') { $sc.Description = 'FopherSync'; $sc.IconLocation = \&quot;$icoPath,0\&quot;; $sc.Save(); } } catch {} } } }; Add-Type -MemberDefinition '[DllImport(\&quot;shell32.dll\&quot;)] public static extern void SHChangeNotify(int wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);' -Name Win32Shell -Namespace Win32 -EA SilentlyContinue; [Win32.Win32Shell]::SHChangeNotify(0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero); } catch {} }&quot;"
+          Condition="Exists('$(MSBuildProjectDirectory)\Assets\app_icon.jpg') Or Exists('$(MSBuildProjectDirectory)\..\..\FopherSync Icon.jpg')" />
+  </Target>
+
+</Project>

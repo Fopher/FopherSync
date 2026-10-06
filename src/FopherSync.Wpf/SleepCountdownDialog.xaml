@@ -1,0 +1,47 @@
+<Window x:Class="FopherSync.Wpf.SleepCountdownDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="FopherSync — Power Management"
+        Height="270" Width="490"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Topmost="True"
+        Background="Transparent"
+        AllowsTransparency="True"
+        WindowStyle="None">
+
+    <Border Background="#16161C" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1.5" CornerRadius="12" Padding="24">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="💤" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center" />
+                    <TextBlock Text="Backup Complete — Powering Down" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock x:Name="TxtMessage" Text="The computer will enter sleep mode in 60 seconds to conserve energy." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <!-- Countdown Bar & Timer -->
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,16,0,16">
+                <DockPanel Margin="0,0,0,8">
+                    <TextBlock Text="Sleeping in:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
+                    <TextBlock x:Name="TxtSecondsRemaining" Text="60 seconds" HorizontalAlignment="Right" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" FontSize="13" />
+                </DockPanel>
+                <ProgressBar x:Name="PrgCountdown" Height="8" Minimum="0" Maximum="60" Value="60" Foreground="{StaticResource AccentBlueBrush}" Background="#22222A" BorderThickness="0" />
+                <TextBlock Text="Press Cancel if you are still working at your computer." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,8,0,0" FontStyle="Italic" />
+            </StackPanel>
+
+            <!-- Action Buttons -->
+            <DockPanel Grid.Row="2">
+                <Button Content="❌ Cancel (Stay Awake)" Click="OnCancelClick" Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Left" Padding="16,8" />
+                <Button Content="💤 Sleep Now" Click="OnSleepNowClick" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Right" Padding="20,8" />
+            </DockPanel>
+        </Grid>
+    </Border>
+</Window>

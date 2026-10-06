@@ -1,0 +1,133 @@
+================================================================================
+FOPHERSYNC SOFTWARE LICENSE & END USER LICENSE AGREEMENT
+================================================================================
+
+Please review both the End User License Agreement (EULA) and the Open Source 
+MIT License below before proceeding with the installation of FopherSync.
+
+--------------------------------------------------------------------------------
+PART 1: END USER LICENSE AGREEMENT (EULA)
+--------------------------------------------------------------------------------
+
+Version 1.0.0 — Effective Date: 2026
+
+PLEASE READ THIS END USER LICENSE AGREEMENT ("AGREEMENT") CAREFULLY BEFORE 
+INSTALLING, COPYING, OR USING FOPHERSYNC ("SOFTWARE"). BY DOWNLOADING, 
+INSTALLING, RUNNING, OR USING THE SOFTWARE, YOU AGREE TO BE BOUND BY THE 
+TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU DO NOT AGREE TO THESE TERMS, 
+DO NOT INSTALL OR USE THE SOFTWARE.
+
+1. GRANT OF LICENSE
+Fopher ("Licensor") grants you a personal, worldwide, non-exclusive, 
+royalty-free license to download, install, run, and use FopherSync for 
+personal, educational, non-profit, or internal business purposes in accordance 
+with this Agreement.
+
+2. SYSTEM REQUIREMENTS & THIRD-PARTY UTILITIES
+FopherSync is an automation and orchestration utility designed for Microsoft 
+Windows operating systems. 
+- FopherSync interfaces with and executes built-in Windows utilities, including 
+  but not limited to Microsoft RoboCopy (robocopy.exe) and Windows Task 
+  Scheduler (schtasks.exe).
+- Microsoft Windows, RoboCopy, and related Microsoft technologies are the 
+  registered trademarks and proprietary software of Microsoft Corporation.
+- FopherSync is an independent application and is neither endorsed by, 
+  affiliated with, nor sponsored by Microsoft Corporation.
+- Use of third-party notifications (including Discord webhooks, ntfy.sh, and 
+  SMTP mail services) is subject to the respective terms and privacy policies 
+  of those services.
+
+3. USER RESPONSIBILITY & DATA SAFETY
+BACKUP OPERATIONS INVOLVE THE MANIPULATION, COPYING, OVERWRITING, AND 
+POTENTIAL DELETION OF FILES (SUCH AS WHEN SELECTING MIRROR OR MOVE MODES).
+You acknowledge and agree that:
+(a) You are solely responsible for verifying the accuracy of all source paths, 
+    destination paths, backup modes, and scheduling configurations.
+(b) You are strongly encouraged to test new or modified backup jobs using 
+    "Simulation / What-If Mode" before executing live backups.
+(c) You are solely responsible for maintaining independent, secondary backups 
+    of all critical, sensitive, or irreplaceable data.
+(d) Licensor does not guarantee that backup operations will be uninterrupted, 
+    error-free, or resilient against underlying disk failures, network 
+    dropouts, or power interruptions.
+
+4. DISCLAIMER OF ALL WARRANTIES ("AS IS")
+THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITH ALL FAULTS AND 
+WITHOUT WARRANTY OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED UNDER APPLICABLE 
+LAW, LICENSOR AND ALL CONTRIBUTORS EXPRESSLY DISCLAIM ALL WARRANTIES, WHETHER 
+EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, INCLUDING, WITHOUT LIMITATION:
+- ANY IMPLIED WARRANTIES OF MERCHANTABILITY;
+- FITNESS FOR A PARTICULAR PURPOSE OR SPECIFIC USE CASE;
+- NON-INFRINGEMENT OF THIRD-PARTY RIGHTS;
+- FREEDOM FROM BUGS, ERRORS, DEFECTS, CORRUPTION, OR SECURITY VULNERABILITIES;
+- ACCURACY OR RELIABILITY OF LOGS, ALERTS, OR BACKUP COMPLETION REPORTS.
+
+NO ORAL OR WRITTEN ADVICE OR INFORMATION PROVIDED BY LICENSOR OR ITS 
+CONTRIBUTORS SHALL CREATE ANY WARRANTY.
+
+5. LIMITATION OF LIABILITY
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL LICENSOR, 
+DEVELOPERS, OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, 
+INCIDENTAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL DAMAGES WHATSOEVER ARISING 
+OUT OF OR IN ANY WAY RELATED TO:
+(a) THE USE OF OR INABILITY TO USE THE SOFTWARE;
+(b) ANY LOSS, DAMAGE, ALTERATION, CORRUPTION, OR DELETION OF DATA OR FILES;
+(c) ANY LOSS OF PROFITS, BUSINESS INTERRUPTION, DOWNTIME, OR REVENUE LOSS;
+(d) HARDWARE FAILURE, NETWORK OUTAGE, OR SLEEP/WAKE POWER MANAGEMENT ISSUES;
+(e) ANY FAILURE OR DELAY OF PUSH, EMAIL, OR WEBHOOK NOTIFICATIONS;
+EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, AND 
+REGARDLESS OF THE THEORY OF LIABILITY (WHETHER IN CONTRACT, TORT, NEGLIGENCE, 
+STRICT LIABILITY, OR OTHERWISE).
+
+UNDER NO CIRCUMSTANCES SHALL LICENSOR'S TOTAL AGGREGATE LIABILITY ARISING 
+FROM OR RELATING TO THIS SOFTWARE EXCEED THE ACTUAL AMOUNT PAID BY YOU FOR 
+THE SOFTWARE, OR ZERO US DOLLARS ($0.00), WHICHEVER IS LESS.
+
+6. VOLUNTARY TIPS AND DONATIONS
+Any financial contributions, tips, or sponsorships voluntarily sent to Licensor 
+via donation platforms (such as Buy Me a Coffee, Ko-fi, GitHub Sponsors, or 
+similar) are strictly non-refundable gifts of appreciation. Voluntary 
+contributions do not constitute a purchase, do not establish a paid service 
+contract or Service Level Agreement (SLA), and do not alter the warranty or 
+liability disclaimers set forth in this Agreement.
+
+7. TERMINATION
+This Agreement remains in effect until terminated. Your rights under this 
+Agreement terminate automatically without notice if you fail to comply with 
+any of its terms. Upon termination, you must cease all use and uninstall all 
+copies of the Software.
+
+8. GOVERNING LAW & SEVERABILITY
+This Agreement shall be governed by and construed in accordance with the laws 
+of your local jurisdiction, excluding its conflicts of law rules. If any 
+provision of this Agreement is held to be invalid or unenforceable, that 
+provision shall be reformed to the minimum extent necessary to achieve its 
+original intent, and all remaining provisions shall remain in full force 
+and effect.
+
+
+--------------------------------------------------------------------------------
+PART 2: OPEN SOURCE LICENSE (MIT)
+--------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2026 Fopher
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
