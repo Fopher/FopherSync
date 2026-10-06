@@ -129,7 +129,7 @@ public class ConfigService
         {
             LogDirectory = DefaultLogDirectory,
             StartMinimizedToTray = false,
-            MinimizeOnClose = true
+            MinimizeOnClose = false
         };
 
         SaveSettings(defaultSettings);

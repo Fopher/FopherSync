@@ -6,66 +6,96 @@
         MinWidth="820" MinHeight="600"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource BgDarkestBrush}"
-        Closing="OnWindowClosing">
+        WindowStyle="None"
+        Closing="OnWindowClosing"
+        SourceInitialized="OnWindowSourceInitialized">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="44"
+                      ResizeBorderThickness="6"
+                      GlassFrameThickness="0"
+                      CornerRadius="0"
+                      UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
 
-        <!-- System Tray Icon Definition -->
-        <tb:TaskbarIcon x:Name="MyTaskbarIcon"
-                        ToolTipText="FopherSync"
-                        TrayLeftMouseDoubleClick="OnTrayDoubleClicked">
-            <tb:TaskbarIcon.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Open Dashboard" Click="OnTrayOpenClick" FontWeight="SemiBold" />
-                    <MenuItem Header="Run All Scheduled Jobs" Click="OnTrayRunAllClick" />
-                    <Separator />
-                    <MenuItem Header="Exit FopherSync" Click="OnTrayExitClick" />
-                </ContextMenu>
-            </tb:TaskbarIcon.ContextMenu>
-        </tb:TaskbarIcon>
+    <Border x:Name="RootWindowBorder"
+            Background="{DynamicResource BgDarkestBrush}"
+            BorderBrush="{DynamicResource BorderSubtleBrush}"
+            BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <!-- Top Navigation Bar -->
-        <Border Grid.Row="0" Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="16,8,16,8">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+            <!-- System Tray Icon Definition -->
+            <tb:TaskbarIcon x:Name="MyTaskbarIcon"
+                            ToolTipText="FopherSync"
+                            TrayLeftMouseDoubleClick="OnTrayDoubleClicked">
+                <tb:TaskbarIcon.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Open Dashboard" Click="OnTrayOpenClick" FontWeight="SemiBold" />
+                        <MenuItem Header="Run All Scheduled Jobs" Click="OnTrayRunAllClick" />
+                        <Separator />
+                        <MenuItem Header="Exit FopherSync" Click="OnTrayExitClick" />
+                    </ContextMenu>
+                </tb:TaskbarIcon.ContextMenu>
+            </tb:TaskbarIcon>
 
-                <!-- Left: App Brand & Mascot -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Image x:Name="ImgBrandLogo" Source="Assets/app_icon.png" Width="26" Height="26" Margin="0,0,8,0" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
-                    <TextBlock Text="FopherSync" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                </StackPanel>
+            <!-- Top Navigation Bar & Sleek Title Bar (Antigravity Style) -->
+            <Border Grid.Row="0" Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Height="44" Padding="14,0,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-                <!-- Center-Left: Navigation Tabs -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0" ClipToBounds="True">
-                    <RadioButton x:Name="NavDashboardRadio" Content="📊  Dashboard" IsChecked="True" Checked="OnNavChanged"
-                                 GroupName="MainNav" Style="{StaticResource TopNavButtonStyle}" />
-                    <RadioButton x:Name="NavHistoryRadio" Content="📑  History &amp; Logs" Checked="OnNavChanged"
-                                 GroupName="MainNav" Style="{StaticResource TopNavButtonStyle}" />
-                    <RadioButton x:Name="NavSettingsRadio" Content="⚙️  Settings &amp; Alerts" Checked="OnNavChanged"
-                                 GroupName="MainNav" Style="{StaticResource TopNavButtonStyle}" />
-                </StackPanel>
-
-                <!-- Right: Schedule Status & Utility Buttons -->
-                <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="2,0,0,3">
-                        <Ellipse x:Name="DotSchedulerStatus" Width="7" Height="7" Fill="{DynamicResource SuccessGreenBrush}" Margin="0,0,5,0" VerticalAlignment="Center" />
-                        <TextBlock x:Name="TxtSidebarSchedulerStatus" Text="Scheduler Ready" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                    <!-- Left: App Brand & Mascot -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <Image x:Name="ImgBrandLogo" Source="Assets/app_icon.png" Width="22" Height="22" Margin="0,0,8,0" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
+                        <TextBlock Text="FopherSync" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Button Content="⚙️ Task Scheduler" Click="OnOpenTaskSchedulerClick" Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="8,4" Margin="0,0,6,0" ToolTip="Open Windows Task Scheduler" />
-                        <Button Content="🚪 Exit" Click="OnAppQuitClick" Style="{StaticResource SecondaryButtonStyle}" FontSize="11" Padding="8,4" ToolTip="Exit FopherSync" />
+
+                    <!-- Center-Left: Navigation Tabs -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0" ClipToBounds="True">
+                        <RadioButton x:Name="NavDashboardRadio" Content="📊  Dashboard" IsChecked="True" Checked="OnNavChanged"
+                                     GroupName="MainNav" Style="{StaticResource TopNavButtonStyle}"
+                                     WindowChrome.IsHitTestVisibleInChrome="True" />
+                        <RadioButton x:Name="NavHistoryRadio" Content="📑  History &amp; Logs" Checked="OnNavChanged"
+                                     GroupName="MainNav" Style="{StaticResource TopNavButtonStyle}"
+                                     WindowChrome.IsHitTestVisibleInChrome="True" />
+                        <RadioButton x:Name="NavSettingsRadio" Content="⚙️  Settings &amp; Alerts" Checked="OnNavChanged"
+                                     GroupName="MainNav" Style="{StaticResource TopNavButtonStyle}"
+                                     WindowChrome.IsHitTestVisibleInChrome="True" />
                     </StackPanel>
-                </StackPanel>
-            </Grid>
-        </Border>
+
+                    <!-- Right: Schedule Status & Utility Buttons -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,14,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <Ellipse x:Name="DotSchedulerStatus" Width="7" Height="7" Fill="{DynamicResource SuccessGreenBrush}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock x:Name="TxtSidebarSchedulerStatus" Text="Scheduler Ready" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Button Content="⚙️ Task Scheduler" Click="OnOpenTaskSchedulerClick" Style="{StaticResource SecondaryButtonStyle}"
+                                FontSize="11" Padding="8,4" Height="28" ToolTip="Open Windows Task Scheduler"
+                                WindowChrome.IsHitTestVisibleInChrome="True" />
+                    </StackPanel>
+
+                    <!-- Far Right: Modern Sleek Window Caption Controls (Antigravity Style) -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
+                        <Button Click="OnWindowMinimizeClick" Style="{StaticResource WindowCaptionButtonStyle}" ToolTip="Minimize">
+                            <TextBlock Text="&#xE921;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets, Arial, sans-serif" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        </Button>
+                        <Button x:Name="BtnMaximize" Click="OnWindowMaximizeClick" Style="{StaticResource WindowCaptionButtonStyle}" ToolTip="Maximize">
+                            <TextBlock x:Name="BtnMaximizeIcon" Text="&#xE922;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets, Arial, sans-serif" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        </Button>
+                        <Button Click="OnWindowCloseClick" Style="{StaticResource WindowCaptionCloseButtonStyle}" ToolTip="Close">
+                            <TextBlock Text="&#xE8BB;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets, Arial, sans-serif" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
 
         <!-- Main Content Area -->
         <Grid Grid.Row="1" Margin="24,18,24,18">
@@ -507,7 +537,7 @@
                                         <TextBlock Text="🌐  Remote Destination Server Power (Wake-on-LAN &amp; Sleep)" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
                                         <CheckBox x:Name="ChkRemoteWakeEnabled" Content="Enable Remote Server Power" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" />
                                     </DockPanel>
-                                    <TextBlock Text="Automatically wake your destination server (e.g. FMC-SERVER) across the home network before backups begin, and optionally put it back to sleep after all jobs finish." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,14" TextWrapping="Wrap" />
+                                    <TextBlock Text="Automatically wake your destination server across the home network before backups begin, and optionally put it back to sleep after all jobs finish." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,14" TextWrapping="Wrap" />
 
                                     <Grid Margin="0,0,0,12">
                                         <Grid.ColumnDefinitions>
@@ -519,7 +549,7 @@
                                         <!-- Server Hostname / IP -->
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Text="Server Hostname or IP:" Margin="0,0,0,4" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                            <TextBox x:Name="EdtServerHost" Text="FMC-SERVER" Height="36" VerticalContentAlignment="Center" Padding="8,4" Background="{DynamicResource BgDarkBrush}" />
+                                            <TextBox x:Name="EdtServerHost" Text="" Height="36" VerticalContentAlignment="Center" Padding="8,4" Background="{DynamicResource BgDarkBrush}" />
                                         </StackPanel>
 
                                         <!-- Server MAC Address -->
@@ -763,7 +793,7 @@
                             <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
                                 <StackPanel>
                                     <TextBlock Text="🖥️  Desktop &amp; System Tray Preferences" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12" />
-                                    <CheckBox x:Name="ChkMinimizeOnClose" Content="Minimize to System Tray when closing window (keeps running invisibly)" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                                    <CheckBox x:Name="ChkMinimizeOnClose" Content="Minimize to System Tray when closing window (keeps running invisibly)" IsChecked="False" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
                                     <CheckBox x:Name="ChkStartMinimized" Content="Start minimized to tray on system startup" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
                                 </StackPanel>
                             </Border>
@@ -862,4 +892,5 @@
 
         </Grid>
     </Grid>
+    </Border>
 </Window>

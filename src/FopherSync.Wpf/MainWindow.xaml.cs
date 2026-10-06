@@ -45,6 +45,7 @@ public partial class MainWindow : Window
 
         InitializeAppIcon();
         LoadInitialData();
+        Loaded += (s, e) => UpdateWindowStateVisuals();
     }
 
     private void LoadInitialData()
@@ -185,12 +186,12 @@ public partial class MainWindow : Window
                 }
 
                 // If destination or source is on a network server, ensure the server is awake first
-                var host = string.IsNullOrWhiteSpace(_settings.RemoteServer.ServerHostName) ? "FMC-SERVER" : _settings.RemoteServer.ServerHostName;
+                var host = _settings.RemoteServer.ServerHostName;
                 var hasMac = !string.IsNullOrWhiteSpace(_settings.RemoteServer.ServerMacAddress);
-                var isNetworkJob = job.DestinationPath.StartsWith(@"\\") || job.SourcePath.StartsWith(@"\\") ||
-                                   job.DestinationPath.Contains(host, StringComparison.OrdinalIgnoreCase) || job.SourcePath.Contains(host, StringComparison.OrdinalIgnoreCase);
+                var isNetworkJob = (!string.IsNullOrWhiteSpace(host) && (job.DestinationPath.Contains(host, StringComparison.OrdinalIgnoreCase) || job.SourcePath.Contains(host, StringComparison.OrdinalIgnoreCase))) ||
+                                   (hasMac && (job.DestinationPath.StartsWith(@"\\") || job.SourcePath.StartsWith(@"\\")));
 
-                if (isNetworkJob && hasMac)
+                if (isNetworkJob && hasMac && !string.IsNullOrWhiteSpace(host))
                 {
                     NavHistoryRadio.IsChecked = true;
                     if (TabHistoryConsoleRadio != null) TabHistoryConsoleRadio.IsChecked = true;
@@ -246,10 +247,10 @@ public partial class MainWindow : Window
         NavHistoryRadio.IsChecked = true;
         if (TabHistoryConsoleRadio != null) TabHistoryConsoleRadio.IsChecked = true;
 
-        var host = string.IsNullOrWhiteSpace(_settings.RemoteServer.ServerHostName) ? "FMC-SERVER" : _settings.RemoteServer.ServerHostName;
+        var host = _settings.RemoteServer.ServerHostName;
         var hasMac = !string.IsNullOrWhiteSpace(_settings.RemoteServer.ServerMacAddress);
 
-        if (hasMac)
+        if (_settings.RemoteServer.WakeOnLanEnabled && hasMac && !string.IsNullOrWhiteSpace(host))
         {
             TxtSidebarSchedulerStatus.Text = $"Waking {host}...";
             AppendConsoleLine($"[WoL] Sending Wake-on-LAN to {host} ({_settings.RemoteServer.ServerMacAddress})...");
@@ -265,7 +266,7 @@ public partial class MainWindow : Window
             await ExecuteJobAsync(job, isDryRun: false);
         }
 
-        if (_settings.RemoteServer.SleepServerAfterComplete)
+        if (_settings.RemoteServer.SleepServerAfterComplete && !string.IsNullOrWhiteSpace(host))
         {
             AppendConsoleLine($"[REMOTE SLEEP] Putting destination server '{host}' to sleep...");
             await WakeOnLanService.ExecuteRemoteSleepAsync(
@@ -826,7 +827,7 @@ public partial class MainWindow : Window
 
         var rs = _settings.RemoteServer;
         ChkRemoteWakeEnabled.IsChecked = rs.WakeOnLanEnabled;
-        EdtServerHost.Text = string.IsNullOrWhiteSpace(rs.ServerHostName) ? "FMC-SERVER" : rs.ServerHostName;
+        EdtServerHost.Text = rs.ServerHostName ?? string.Empty;
         EdtServerMac.Text = rs.ServerMacAddress;
         EdtServerWakeWait.Text = rs.WakeWaitSeconds.ToString();
         EdtServerUser.Text = rs.ServerUsername;
@@ -1125,7 +1126,11 @@ public partial class MainWindow : Window
     private async void OnAutoDetectMacClick(object sender, RoutedEventArgs e)
     {
         var host = EdtServerHost.Text.Trim();
-        if (string.IsNullOrWhiteSpace(host)) host = "FMC-SERVER";
+        if (string.IsNullOrWhiteSpace(host))
+        {
+            MessageBox.Show("Please enter a server hostname or IP address first.", "Server Hostname Required", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
         BtnAutoDetectMac.IsEnabled = false;
         BtnAutoDetectMac.Content = "Detecting...";
@@ -1172,9 +1177,16 @@ public partial class MainWindow : Window
                 return;
             }
 
-            var isOnline = await WakeOnLanService.PingHostAsync(host, 1500);
-            var status = isOnline ? $"Server '{host}' is ONLINE and responding to network pings!" : $"Wake-on-LAN Magic Packet broadcasted to {mac}.\n\nIf the server was asleep, it should power on shortly.";
-            MessageBox.Show(status, "Wake-on-LAN Test", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (!string.IsNullOrWhiteSpace(host))
+            {
+                var isOnline = await WakeOnLanService.PingHostAsync(host, 1500);
+                var status = isOnline ? $"Server '{host}' is ONLINE and responding to network pings!" : $"Wake-on-LAN Magic Packet broadcasted to {mac}.\n\nIf '{host}' was asleep, it should power on shortly.";
+                MessageBox.Show(status, "Wake-on-LAN Test", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show($"Wake-on-LAN Magic Packet broadcasted to {mac}.\n\nIf the server was asleep, it should power on shortly.", "Wake-on-LAN Test", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
         finally
         {
@@ -1189,7 +1201,11 @@ public partial class MainWindow : Window
         var user = EdtServerUser.Text.Trim();
         var pass = EdtServerPass.Password;
 
-        if (string.IsNullOrWhiteSpace(host)) host = "FMC-SERVER";
+        if (string.IsNullOrWhiteSpace(host))
+        {
+            MessageBox.Show("Please enter a server hostname or IP address first.", "Server Hostname Required", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
         BtnPairServer.IsEnabled = false;
         BtnPairServer.Content = "Pairing...";
@@ -1241,7 +1257,11 @@ public partial class MainWindow : Window
         var user = EdtServerUser.Text.Trim();
         var pass = EdtServerPass.Password;
 
-        if (string.IsNullOrWhiteSpace(host)) host = "FMC-SERVER";
+        if (string.IsNullOrWhiteSpace(host))
+        {
+            MessageBox.Show("Please enter a server hostname or IP address first.", "Server Hostname Required", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
         var confirm = MessageBox.Show(
             $"Are you sure you want to test putting '{host}' to sleep right now?",
@@ -1274,6 +1294,69 @@ public partial class MainWindow : Window
 
     #region System Tray & Window Lifecycle
 
+    [DllImport("dwmapi.dll", PreserveSig = true)]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+    private const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
+    private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
+    private void OnWindowSourceInitialized(object? sender, EventArgs e)
+    {
+        try
+        {
+            var helper = new System.Windows.Interop.WindowInteropHelper(this);
+            int useDarkMode = 1;
+            if (DwmSetWindowAttribute(helper.Handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref useDarkMode, sizeof(int)) != 0)
+            {
+                DwmSetWindowAttribute(helper.Handle, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1, ref useDarkMode, sizeof(int));
+            }
+        }
+        catch { }
+
+        UpdateWindowStateVisuals();
+    }
+
+    protected override void OnStateChanged(EventArgs e)
+    {
+        base.OnStateChanged(e);
+        UpdateWindowStateVisuals();
+    }
+
+    private void UpdateWindowStateVisuals()
+    {
+        if (RootWindowBorder == null) return;
+
+        if (WindowState == WindowState.Maximized)
+        {
+            RootWindowBorder.Margin = new Thickness(7);
+            RootWindowBorder.BorderThickness = new Thickness(0);
+            if (BtnMaximizeIcon != null) BtnMaximizeIcon.Text = "\uE923";
+            if (BtnMaximize != null) BtnMaximize.ToolTip = "Restore Down";
+        }
+        else
+        {
+            RootWindowBorder.Margin = new Thickness(0);
+            RootWindowBorder.BorderThickness = new Thickness(1);
+            if (BtnMaximizeIcon != null) BtnMaximizeIcon.Text = "\uE922";
+            if (BtnMaximize != null) BtnMaximize.ToolTip = "Maximize";
+        }
+    }
+
+    private void OnWindowMinimizeClick(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void OnWindowMaximizeClick(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    private void OnWindowCloseClick(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
     private void OnWindowClosing(object? sender, CancelEventArgs e)
     {
         if (!_isExplicitExit && _settings.MinimizeOnClose)
@@ -1281,6 +1364,10 @@ public partial class MainWindow : Window
             e.Cancel = true;
             Hide();
             try { MyTaskbarIcon.ShowNotification("FopherSync", "FopherSync is running in the background. Double-click to open."); } catch { }
+        }
+        else
+        {
+            try { MyTaskbarIcon.Dispose(); } catch { }
         }
     }
 

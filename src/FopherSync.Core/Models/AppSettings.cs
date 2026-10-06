@@ -3,7 +3,7 @@ namespace FopherSync.Core.Models;
 public class AppSettings
 {
     public bool StartMinimizedToTray { get; set; } = false;
-    public bool MinimizeOnClose { get; set; } = true;
+    public bool MinimizeOnClose { get; set; } = false;
     public bool StartWithWindows { get; set; } = true;
     public string LogDirectory { get; set; } = string.Empty;
     public string ThemeMode { get; set; } = "Dark"; // "Dark", "Light", or "System"
@@ -29,7 +29,7 @@ public class RemoteServerSettings
 {
     public bool WakeOnLanEnabled { get; set; } = false;
     public string ServerMacAddress { get; set; } = string.Empty; // e.g. "00:11:22:33:44:55"
-    public string ServerHostName { get; set; } = "FMC-SERVER"; // IP or hostname
+    public string ServerHostName { get; set; } = string.Empty; // IP or hostname
     public int WakeWaitSeconds { get; set; } = 90; // Max seconds to wait for server to come online
 
     public bool SleepServerAfterComplete { get; set; } = false;
