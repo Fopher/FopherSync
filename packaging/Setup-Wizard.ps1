@@ -447,6 +447,12 @@ $btnNext.Add_Click({
                 Copy-Item $agreementPath -Destination (Join-Path $targetDir "Agreement.txt") -Force
             }
 
+            # Copy Uninstaller scripts
+            $uninstPs1 = Join-Path $scriptDir "Uninstall-FopherSync.ps1"
+            $uninstBat = Join-Path $scriptDir "Uninstall.bat"
+            if (Test-Path $uninstPs1) { Copy-Item $uninstPs1 -Destination (Join-Path $targetDir "Uninstall-FopherSync.ps1") -Force }
+            if (Test-Path $uninstBat) { Copy-Item $uninstBat -Destination (Join-Path $targetDir "Uninstall.bat") -Force }
+
             # Copy Assets (app.ico)
             $assetsDir = Join-Path $targetDir "Assets"
             if (!(Test-Path $assetsDir)) { New-Item -ItemType Directory -Path $assetsDir -Force | Out-Null }
@@ -479,6 +485,33 @@ $btnNext.Add_Click({
             $eulaShortcut.Arguments = "`"$targetDir\Agreement.txt`""
             $eulaShortcut.Description = "View FopherSync EULA and License Agreement"
             $eulaShortcut.Save()
+
+            $uninstShortcut = $wsh.CreateShortcut((Join-Path $startMenuDir "Uninstall FopherSync.lnk"))
+            $uninstShortcut.TargetPath = (Join-Path $targetDir "Uninstall.bat")
+            $uninstShortcut.WorkingDirectory = $targetDir
+            $uninstShortcut.Description = "Uninstall FopherSync"
+            if (Test-Path $installedIcon) { $uninstShortcut.IconLocation = "$installedIcon,0" }
+            $uninstShortcut.Save()
+
+            # Register in Windows Add/Remove Programs (Apps & features)
+            try {
+                $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+                $regRoot = if ($isAdmin) {
+                    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\FopherSync"
+                } else {
+                    "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\FopherSync"
+                }
+                if (!(Test-Path $regRoot)) { New-Item -Path $regRoot -Force | Out-Null }
+                Set-ItemProperty -Path $regRoot -Name "DisplayName" -Value "FopherSync" -Force
+                Set-ItemProperty -Path $regRoot -Name "DisplayVersion" -Value "1.0.0" -Force
+                Set-ItemProperty -Path $regRoot -Name "Publisher" -Value "Fopher" -Force
+                Set-ItemProperty -Path $regRoot -Name "InstallLocation" -Value $targetDir -Force
+                Set-ItemProperty -Path $regRoot -Name "UninstallString" -Value "`"$targetDir\Uninstall.bat`"" -Force
+                Set-ItemProperty -Path $regRoot -Name "QuietUninstallString" -Value "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$targetDir\Uninstall-FopherSync.ps1`" -Silent -PurgeUserData" -Force
+                if (Test-Path $installedIcon) { Set-ItemProperty -Path $regRoot -Name "DisplayIcon" -Value "$installedIcon" -Force }
+                Set-ItemProperty -Path $regRoot -Name "NoModify" -Value 1 -Type DWord -Force
+                Set-ItemProperty -Path $regRoot -Name "NoRepair" -Value 1 -Type DWord -Force
+            } catch { }
 
             # 2. Desktop Shortcut
             if ($chkDesktop.Checked) {

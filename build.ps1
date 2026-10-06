@@ -25,11 +25,13 @@ Copy-Item "src\FopherSync.Wpf\Assets\app.ico" -Destination "$publishAssets\app.i
 if (Test-Path "src\FopherSync.Wpf\Assets\app_icon.png") {
     Copy-Item "src\FopherSync.Wpf\Assets\app_icon.png" -Destination "$publishAssets\app_icon.png" -Force
 }
-# Copy EULA and License into publish folder
+# Copy EULA, License, and Uninstaller into publish folder
 Copy-Item "packaging\eula.txt" -Destination "$publishDir\EULA.txt" -Force
 Copy-Item "packaging\license.txt" -Destination "$publishDir\LICENSE.txt" -Force
 Copy-Item "packaging\agreement.txt" -Destination "$publishDir\Agreement.txt" -Force
-Write-Host "Published to: $publishDir (with Assets, EULA.txt, LICENSE.txt, and Agreement.txt)" -ForegroundColor Green
+Copy-Item "packaging\Uninstall-FopherSync.ps1" -Destination "$publishDir\Uninstall-FopherSync.ps1" -Force
+Copy-Item "packaging\Uninstall.bat" -Destination "$publishDir\Uninstall.bat" -Force
+Write-Host "Published to: $publishDir (with Assets, EULA.txt, LICENSE.txt, Agreement.txt, and Uninstaller)" -ForegroundColor Green
 
 # Refresh Windows Explorer icon cache
 try {

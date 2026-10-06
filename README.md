@@ -103,7 +103,27 @@ The installer:
 - Installs the app binaries, icons, `EULA.txt`, and `LICENSE.txt` into the install folder
 - Creates Start Menu & Desktop shortcuts, with an optional Windows Startup task
 - Registers a Start Menu shortcut to view the EULA & License at any time
+- Registers in Windows Apps & Features with clean uninstallation support
 
+### 🧹 Clean Uninstallation
+
+FopherSync includes complete uninstallation support that eliminates orphaned files, stops running background processes, and removes scheduled tasks.
+
+#### Option A: Windows Apps & Features
+Open **Windows Settings** -> **Apps** -> **Installed apps** (or **Add or remove programs**), locate **FopherSync**, and click **Uninstall**. The uninstaller will:
+- Gracefully close any background system tray processes.
+- Unregister and delete scheduled tasks from Windows Task Scheduler (`FopherSync`, `FopherSync Backup`).
+- Prompt you whether to remove or preserve your backup job configurations, history database, and logs.
+- Remove all shortcuts (Desktop, Start Menu, Startup) and delete the installation directory completely.
+
+#### Option B: Standalone Uninstaller / Cleanup Tool
+If you need to wipe leftovers immediately or performed an uninstallation without removing AppData:
+- Double-click `Uninstall.bat` in the project root or in `packaging\Uninstall.bat`.
+- Or run in an elevated PowerShell session:
+  ```powershell
+  .\packaging\Uninstall-FopherSync.ps1
+  ```
+  *(To silently remove everything including AppData without prompts: `.\packaging\Uninstall-FopherSync.ps1 -Silent -PurgeUserData`)*
 
 ---
 
