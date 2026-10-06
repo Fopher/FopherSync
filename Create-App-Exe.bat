@@ -39,6 +39,9 @@ if %ERRORLEVEL% NEQ 0 (
 
 if not exist "%~dp0dist\Assets" mkdir "%~dp0dist\Assets"
 copy /Y "src\FopherSync.Wpf\Assets\*.*" "%~dp0dist\Assets\" >nul
+copy /Y "packaging\eula.txt" "%~dp0dist\EULA.txt" >nul 2>&1
+copy /Y "packaging\license.txt" "%~dp0dist\LICENSE.txt" >nul 2>&1
+copy /Y "packaging\agreement.txt" "%~dp0dist\Agreement.txt" >nul 2>&1
 
 if not exist "%~dp0dist\psshutdown.exe" (
     powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('https://live.sysinternals.com/psshutdown.exe', '%~dp0dist\psshutdown.exe')" >nul 2>&1
