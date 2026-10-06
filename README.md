@@ -99,7 +99,7 @@ or in PowerShell:
 
 The installer:
 - Prompts for license & EULA acceptance before installation
-- Lets users choose their installation directory (defaults to `%LocalAppData%\Programs\FopherSync` for elevation-free, zero-hassle install)
+- Lets users choose their installation directory (defaults to `C:\Program Files\FopherSync`)
 - Installs the app binaries, icons, `EULA.txt`, and `LICENSE.txt` into the install folder
 - Creates Start Menu & Desktop shortcuts, with an optional Windows Startup task
 - Registers a Start Menu shortcut to view the EULA & License at any time

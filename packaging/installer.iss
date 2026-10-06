@@ -18,7 +18,10 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 
-; Installation target directory (per-user by default, clean and elevation-free)
+; 64-bit application architecture
+ArchitecturesInstallIn64BitMode=x64compatible
+
+; Installation target directory defaults to Program Files (C:\Program Files\FopherSync)
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 
@@ -39,9 +42,8 @@ OutputBaseFilename=FopherSync_Setup_v1.0.0
 Compression=lzma2/ultra64
 SolidCompression=yes
 
-; User privileges (per-user setup allows zero-elevation installation)
-PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+; Require administrator privileges to install into Program Files
+PrivilegesRequired=admin
 
 ; Visual assets & icons
 SetupIconFile=..\src\FopherSync.Wpf\Assets\app.ico

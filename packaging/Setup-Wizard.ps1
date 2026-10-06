@@ -197,7 +197,7 @@ $lblDirPrompt.Location = New-Object System.Drawing.Point(24, 75)
 $lblDirPrompt.Size = New-Object System.Drawing.Size(460, 50)
 $pageDir.Controls.Add($lblDirPrompt)
 
-$defaultInstallPath = Join-Path $env:LOCALAPPDATA "Programs\FopherSync"
+$defaultInstallPath = Join-Path $env:ProgramFiles "FopherSync"
 $txtInstallDir = New-Object System.Windows.Forms.TextBox
 $txtInstallDir.Location = New-Object System.Drawing.Point(24, 140)
 $txtInstallDir.Size = New-Object System.Drawing.Size(360, 24)
