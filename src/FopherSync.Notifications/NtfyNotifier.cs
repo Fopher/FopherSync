@@ -9,7 +9,7 @@ public class NtfyNotifier : INotifier
     private readonly HttpClient _httpClient;
     private readonly NotificationSettings _settings;
 
-    public string ChannelName => "ntfy.sh (Phone Push)";
+    public string ChannelName => "ntfy (Phone Push)";
 
     public NtfyNotifier(NotificationSettings settings, HttpClient? httpClient = null)
     {
@@ -20,10 +20,15 @@ public class NtfyNotifier : INotifier
     public async Task<(bool Success, string Message)> SendNotificationAsync(NotificationPayload payload, CancellationToken cancellationToken = default)
     {
         if (!_settings.NtfyEnabled || string.IsNullOrWhiteSpace(_settings.NtfyTopic))
-            return (false, "ntfy.sh is disabled or topic is empty.");
+            return (false, "ntfy push is disabled or topic is empty.");
 
-        var server = string.IsNullOrWhiteSpace(_settings.NtfyServerUrl) ? "https://ntfy.sh" : _settings.NtfyServerUrl.TrimEnd('/');
-        var url = $"{server}/{_settings.NtfyTopic.Trim()}";
+        var server = string.IsNullOrWhiteSpace(_settings.NtfyServerUrl) ? "https://ntfy.sh" : _settings.NtfyServerUrl.Trim().TrimEnd('/');
+        if (!server.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !server.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            server = "https://" + server;
+        }
+        var topic = _settings.NtfyTopic.Trim().TrimStart('/');
+        var url = $"{server}/{topic}";
 
         var isFailure = payload.Status == JobStatus.Failed || payload.Status == JobStatus.AbortedBySafetyGuard;
         var isWarning = payload.Status == JobStatus.Warning;
@@ -50,6 +55,16 @@ public class NtfyNotifier : INotifier
                 Content = new StringContent(bodyBuilder.ToString(), Encoding.UTF8, "text/plain")
             };
 
+            if (!string.IsNullOrWhiteSpace(_settings.NtfyToken))
+            {
+                var token = _settings.NtfyToken.Trim();
+                if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    token = token.Substring(7).Trim();
+                }
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
             request.Headers.Add("Title", title);
             request.Headers.Add("Priority", priority);
             request.Headers.Add("Tags", tags);
@@ -60,7 +75,12 @@ public class NtfyNotifier : INotifier
                 return (true, "Push notification sent successfully.");
             }
 
-            return (false, $"ntfy.sh returned HTTP {response.StatusCode}");
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                return (false, $"ntfy server returned HTTP {(int)response.StatusCode} ({response.ReasonPhrase}): Authentication failed. Please verify your Access Token and topic permissions.");
+            }
+
+            return (false, $"ntfy server returned HTTP {(int)response.StatusCode} ({response.ReasonPhrase})");
         }
         catch (Exception ex)
         {

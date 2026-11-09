@@ -166,11 +166,14 @@ public partial class App : Application
         var dispatcher = new NotificationDispatcher(settings.Notifications);
         await dispatcher.DispatchAsync(record);
 
-        // If sleep on complete is enabled, display the 60s countdown dialog
+        // If sleep on complete is enabled, display the 60s countdown dialog (unless within quiet hours)
         if (settings.SleepAfterComplete)
         {
-            var sleepDialog = new SleepCountdownDialog(job.Name);
-            sleepDialog.ShowDialog();
+            if (!PowerService.IsWithinPreventSleepHours(settings))
+            {
+                var sleepDialog = new SleepCountdownDialog(job.Name);
+                sleepDialog.ShowDialog();
+            }
         }
     }
 
@@ -315,16 +318,23 @@ public partial class App : Application
                 msg => Log(msg));
         }
 
-        // If global sleep setting is enabled, display the 60s countdown dialog before powering down
+        // If global sleep setting is enabled, display the 60s countdown dialog before powering down (unless within quiet hours)
         if (settings.SleepAfterComplete)
         {
-            Log("Sleep-after-complete enabled — showing countdown.");
-            var summaryMsg = totalCopied > 0
-                ? $"All scheduled backups completed successfully ({totalCopied:N0} files copied)."
-                : "All scheduled backups completed. Files are already fully up to date (0 new files needed copying).";
+            if (PowerService.IsWithinPreventSleepHours(settings))
+            {
+                Log($"[POWER] Sleep-after-complete is enabled, but suppressed because current time is within quiet hours ({PowerService.FormatPreventSleepWindow(settings)}). System will remain awake.");
+            }
+            else
+            {
+                Log("Sleep-after-complete enabled — showing countdown.");
+                var summaryMsg = totalCopied > 0
+                    ? $"All scheduled backups completed successfully ({totalCopied:N0} files copied)."
+                    : "All scheduled backups completed. Files are already fully up to date (0 new files needed copying).";
 
-            var sleepDialog = new SleepCountdownDialog("All Scheduled Backups", summaryMsg);
-            sleepDialog.ShowDialog();
+                var sleepDialog = new SleepCountdownDialog("All Scheduled Backups", summaryMsg);
+                sleepDialog.ShowDialog();
+            }
         }
 
         Log("=== Scheduled run finished ===");

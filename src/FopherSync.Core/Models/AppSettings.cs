@@ -18,6 +18,9 @@ public class AppSettings
     public bool WakeToRun { get; set; } = true; // Wake PC from sleep at scheduled time
     public bool CatchupIfMissed { get; set; } = true; // Run immediately upon wake-up if missed
     public bool SleepAfterComplete { get; set; } = false; // Put PC to sleep when all jobs finish
+    public bool PreventSleepBetweenHours { get; set; } = false; // Never automatically put to sleep between certain hours
+    public TimeSpan PreventSleepStart { get; set; } = new TimeSpan(8, 0, 0); // Default: 08:00 AM
+    public TimeSpan PreventSleepEnd { get; set; } = new TimeSpan(18, 0, 0); // Default: 06:00 PM (18:00)
 
     // Remote Server Power (Wake-on-LAN & Remote Sleep)
     public RemoteServerSettings RemoteServer { get; set; } = new();
@@ -47,10 +50,11 @@ public class NotificationSettings
     public bool NotifyOnWarning { get; set; } = true;
     public bool NotifyOnFailure { get; set; } = true;
 
-    // ntfy.sh (Primary Push to Phone)
+    // ntfy (Primary Push to Phone & Self-Hosted)
     public bool NtfyEnabled { get; set; } = false;
     public string NtfyServerUrl { get; set; } = "https://ntfy.sh";
     public string NtfyTopic { get; set; } = ""; // e.g. "my-secret-backup-alert-9821"
+    public string NtfyToken { get; set; } = ""; // Optional Bearer token for self-hosted or private topics (e.g. tk_...)
 
     // Discord Webhook (Secondary Push)
     public bool DiscordEnabled { get; set; } = false;

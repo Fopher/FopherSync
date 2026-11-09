@@ -15,11 +15,12 @@
 - **Sleep & Wake-up Catchup:**
   - Integrates with native Windows Task Scheduler with `StartWhenAvailable = true`.
   - If a 2:00 AM backup is missed because your computer was asleep, it triggers automatically as soon as you wake it up.
+  - **Quiet Hours Sleep Protection:** 'Never automatically put to sleep between certain hours' sub-option ensures your computer stays awake if catchup or scheduled backups finish during active work hours.
 - **Silent Background & System Tray:**
   - Closes or minimizes to the system tray, running invisibly in the background.
   - Silent headless CLI mode (`--run-job <id> --silent`) for zero-interruption scheduled execution.
 - **Tri-Channel Alerting (Instant Phone Alerts):**
-  - **ntfy.sh (Primary Push):** Free, private push notifications straight to your phone.
+  - **ntfy (Primary Push):** Free, private push notifications straight to your phone via public `ntfy.sh` or your own self-hosted domain (e.g. `https://ntfy.fopher.net`) with DPAPI-encrypted Bearer token authentication.
   - **Discord Webhook:** Formatted status cards sent directly to your server.
   - **Gmail / SMTP:** Full HTML backup reports delivered to your inbox.
 - **SQLite & JSON Persistence:**
@@ -127,9 +128,16 @@ If you need to wipe leftovers immediately or performed an uninstallation without
 
 ---
 
-## 📱 Setting Up Phone Push Notifications (ntfy.sh)
+## 📱 Setting Up Phone Push Notifications (ntfy & Self-Hosted)
 
+### Using Public ntfy.sh
 1. Install the free **ntfy** app on your phone ([Google Play](https://play.google.com/store/apps/details?id=io.heckel.ntfy) or [F-Droid](https://f-droid.org/packages/io.heckel.ntfy/)).
 2. Pick a unique, unguessable topic name in FopherSync (e.g. `backup-john-8291`).
 3. In the ntfy app on your phone, tap **+** and subscribe to that same topic name.
 4. Click **Send Test Push** in FopherSync Settings — your phone will chime instantly!
+
+### Using Self-Hosted ntfy / Custom Domain (e.g. ntfy.fopher.net)
+1. In FopherSync Settings, enter your custom **Server URL** (e.g. `https://ntfy.fopher.net`).
+2. If your server enforces access control (`deny-all`), enter your bot/user API token (`tk_...`) into the **Access Token** field.
+3. In your phone's ntfy app Settings, set **Default server** to your custom domain and log into your account before subscribing to your topic.
+4. Click **Send Test Push** to verify the end-to-end authenticated flow!

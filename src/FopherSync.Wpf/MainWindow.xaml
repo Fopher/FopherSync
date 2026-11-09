@@ -512,7 +512,74 @@
                                     <!-- Power & Wake Controls -->
                                     <CheckBox x:Name="ChkGlobalWakeToRun" Content="⏰ Wake computer from sleep to run backup at scheduled time" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
                                     <CheckBox x:Name="ChkGlobalCatchupIfMissed" Content="🔄 Catch up missed backup immediately upon wake-up (if PC was asleep/off)" IsChecked="True" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
-                                    <CheckBox x:Name="ChkGlobalSleepAfterComplete" Content="💤 Put computer to sleep when all jobs complete (with 60-second cancel countdown)" IsChecked="False" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,14" />
+                                    <CheckBox x:Name="ChkGlobalSleepAfterComplete" Content="💤 Put computer to sleep when all jobs complete (with 60-second cancel countdown)" IsChecked="False" Checked="OnGlobalSleepAfterCompleteChanged" Unchecked="OnGlobalSleepAfterCompleteChanged" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+
+                                    <!-- Sub-Option: Prevent Sleep Between Certain Hours -->
+                                    <StackPanel x:Name="PanelSleepOptions" Margin="24,0,0,14" Visibility="Collapsed">
+                                        <CheckBox x:Name="ChkPreventSleepBetweenHours" Content="🚫 Never automatically put to sleep between certain hours" Checked="OnPreventSleepBetweenHoursChanged" Unchecked="OnPreventSleepBetweenHoursChanged" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+
+                                        <Border x:Name="PanelPreventSleepTimes" Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="14,10" Margin="20,0,0,4" Visibility="Collapsed">
+                                            <StackPanel>
+                                                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="Keep awake between:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                                                    <!-- Start Hour -->
+                                                    <ComboBox x:Name="CmbPreventSleepStartHour" SelectionChanged="OnPreventSleepTimeChanged" Width="64" Height="30" VerticalContentAlignment="Center" Background="{DynamicResource BgCardHoverBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12">
+                                                        <ComboBoxItem Content="12" />
+                                                        <ComboBoxItem Content="01" />
+                                                        <ComboBoxItem Content="02" />
+                                                        <ComboBoxItem Content="03" />
+                                                        <ComboBoxItem Content="04" />
+                                                        <ComboBoxItem Content="05" />
+                                                        <ComboBoxItem Content="06" />
+                                                        <ComboBoxItem Content="07" />
+                                                        <ComboBoxItem Content="08" IsSelected="True" />
+                                                        <ComboBoxItem Content="09" />
+                                                        <ComboBoxItem Content="10" />
+                                                        <ComboBoxItem Content="11" />
+                                                    </ComboBox>
+                                                    <TextBlock Text=":" VerticalAlignment="Center" Margin="3,0" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                    <!-- Start Minute -->
+                                                    <ComboBox x:Name="CmbPreventSleepStartMinute" SelectionChanged="OnPreventSleepTimeChanged" Width="64" Height="30" VerticalContentAlignment="Center" Background="{DynamicResource BgCardHoverBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" />
+                                                    <!-- Start AM/PM -->
+                                                    <ComboBox x:Name="CmbPreventSleepStartAmPm" SelectionChanged="OnPreventSleepTimeChanged" Width="66" Height="30" VerticalContentAlignment="Center" Margin="6,0,10,0" Background="{DynamicResource BgCardHoverBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12">
+                                                        <ComboBoxItem Content="AM" IsSelected="True" />
+                                                        <ComboBoxItem Content="PM" />
+                                                    </ComboBox>
+
+                                                    <TextBlock Text="and" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+
+                                                    <!-- End Hour -->
+                                                    <ComboBox x:Name="CmbPreventSleepEndHour" SelectionChanged="OnPreventSleepTimeChanged" Width="64" Height="30" VerticalContentAlignment="Center" Background="{DynamicResource BgCardHoverBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12">
+                                                        <ComboBoxItem Content="12" />
+                                                        <ComboBoxItem Content="01" />
+                                                        <ComboBoxItem Content="02" />
+                                                        <ComboBoxItem Content="03" />
+                                                        <ComboBoxItem Content="04" />
+                                                        <ComboBoxItem Content="05" />
+                                                        <ComboBoxItem Content="06" IsSelected="True" />
+                                                        <ComboBoxItem Content="07" />
+                                                        <ComboBoxItem Content="08" />
+                                                        <ComboBoxItem Content="09" />
+                                                        <ComboBoxItem Content="10" />
+                                                        <ComboBoxItem Content="11" />
+                                                    </ComboBox>
+                                                    <TextBlock Text=":" VerticalAlignment="Center" Margin="3,0" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                    <!-- End Minute -->
+                                                    <ComboBox x:Name="CmbPreventSleepEndMinute" SelectionChanged="OnPreventSleepTimeChanged" Width="64" Height="30" VerticalContentAlignment="Center" Background="{DynamicResource BgCardHoverBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" />
+                                                    <!-- End AM/PM -->
+                                                    <ComboBox x:Name="CmbPreventSleepEndAmPm" SelectionChanged="OnPreventSleepTimeChanged" Width="66" Height="30" VerticalContentAlignment="Center" Margin="6,0,12,0" Background="{DynamicResource BgCardHoverBrush}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12">
+                                                        <ComboBoxItem Content="AM" />
+                                                        <ComboBoxItem Content="PM" IsSelected="True" />
+                                                    </ComboBox>
+
+                                                    <!-- Live Preview Badge -->
+                                                    <TextBlock x:Name="TxtPreventSleepPreview" Text="(Stays awake 08:00 AM – 06:00 PM)" VerticalAlignment="Center" Foreground="{DynamicResource WarningAmberBrush}" FontSize="12" FontWeight="SemiBold" />
+                                                </WrapPanel>
+                                                <TextBlock Text="Prevents putting the computer to sleep if a backup finishes during your daytime or working hours, even though sleep on completion is enabled." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,6,0,0" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
 
                                     <!-- Iterative Backups / Retention (Combined with Global Schedule) -->
                                     <Border Background="{DynamicResource BgDarkBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="14,12" Margin="0,0,0,4">
@@ -738,17 +805,30 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- 3. ntfy.sh Section (THIRD) -->
+                            <!-- 3. ntfy Section (THIRD) -->
                             <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
                                 <StackPanel>
                                     <DockPanel Margin="0,0,0,10">
-                                        <TextBlock Text="📱  ntfy.sh (Phone Push Notifications)" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text="📱  ntfy (Phone Push Notifications &amp; Self-Hosted)" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
                                         <CheckBox x:Name="ChkNtfyEnabled" Content="Enable" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}" />
                                     </DockPanel>
-                                    <TextBlock Text="Free, open source push notifications directly to your phone. Install the ntfy Android/iOS app and subscribe to your topic name." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap" />
+                                    <TextBlock Text="Free, open source push notifications directly to your phone. Supports official ntfy.sh as well as custom domains and self-hosted servers." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap" />
 
+                                    <!-- Server URL -->
+                                    <TextBlock Text="Server URL (Default: https://ntfy.sh)" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="EdtNtfyServerUrl" Grid.Column="0" ToolTip="e.g. https://ntfy.sh or https://ntfy.fopher.net" />
+                                        <Button Grid.Column="2" Content="Reset to Default" Click="OnResetNtfyServerUrlClick" Style="{StaticResource SecondaryButtonStyle}" ToolTip="Reset server URL to https://ntfy.sh" />
+                                    </Grid>
+
+                                    <!-- Topic Name & Actions -->
                                     <TextBlock Text="ntfy Topic (Pick a topic name, e.g. FopherSync)" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                    <Grid>
+                                    <Grid Margin="0,0,0,10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="10" />
@@ -757,7 +837,7 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBox x:Name="EdtNtfyTopic" Grid.Column="0" />
-                                        <Button Grid.Column="2" Click="OnNtfyHelpClick" Style="{StaticResource SecondaryButtonStyle}" ToolTip="How to set up phone alerts with ntfy.sh">
+                                        <Button Grid.Column="2" Click="OnNtfyHelpClick" Style="{StaticResource SecondaryButtonStyle}" ToolTip="How to set up phone alerts with ntfy or your self-hosted server">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <TextBlock Text="❓" Foreground="{DynamicResource DangerRedBrush}" FontWeight="Bold" Margin="0,0,5,0" VerticalAlignment="Center" />
                                                 <TextBlock Text="Need Help?" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
@@ -765,6 +845,20 @@
                                         </Button>
                                         <Button Grid.Column="4" Content="Send Test Push" Click="OnTestNtfyClick" Style="{StaticResource SecondaryButtonStyle}" />
                                     </Grid>
+
+                                    <!-- Access Token -->
+                                    <TextBlock Text="Access Token (Optional for public ntfy.sh; required for self-hosted deny-all servers)" Margin="0,0,0,4" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <PasswordBox x:Name="EdtNtfyTokenPass" Grid.Column="0" ToolTip="Bearer token (e.g. tk_...)" />
+                                        <TextBox x:Name="EdtNtfyTokenText" Grid.Column="0" Visibility="Collapsed" ToolTip="Bearer token (e.g. tk_...)" />
+                                        <Button x:Name="BtnToggleNtfyToken" Grid.Column="2" Content="👁 Show" Click="OnToggleNtfyTokenVisibilityClick" Style="{StaticResource SecondaryButtonStyle}" ToolTip="Toggle token visibility" Padding="12,0" />
+                                    </Grid>
+                                    <TextBlock Text="Encrypted securely on this machine using Windows DPAPI. Provide a Bearer token (tk_...) if your server requires authentication." FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>

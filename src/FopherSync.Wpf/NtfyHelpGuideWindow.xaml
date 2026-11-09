@@ -1,7 +1,7 @@
 <Window x:Class="FopherSync.Wpf.NtfyHelpGuideWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="ntfy.sh Push Notifications Setup Help" Height="650" Width="680"
+        Title="ntfy Push Notifications Setup Help" Height="680" Width="680"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource BgDarkestBrush}"
@@ -17,7 +17,7 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock Text="📱 ntfy.sh Phone Push Setup Guide" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+            <TextBlock Text="📱 ntfy Phone Push Setup Guide (ntfy.sh &amp; Self-Hosted)" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
             <TextBlock Text="Get free, instant backup alerts on your phone (Android &amp; iOS) or web browser with zero hassle." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
         </StackPanel>
 
@@ -87,7 +87,7 @@
                 </Border>
 
                 <!-- Section 3: What notifications look like -->
-                <Border Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <Border Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,14">
                     <StackPanel>
                         <TextBlock Text="🔔  3. What You Will Receive" FontSize="14" FontWeight="Bold" Foreground="{StaticResource WarningAmberBrush}" Margin="0,0,0,8" />
                         <TextBlock Text="Whenever a scheduled backup runs (or fails/aborts), FopherSync sends a phone notification with:" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
@@ -97,6 +97,27 @@
                                 <TextBlock Text="• Backup Status: Clear Success, Warning, or Failure indicators with color tags." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" TextWrapping="Wrap" />
                                 <TextBlock Text="• Transfer Stats: Total files copied, bytes transferred, and total execution duration." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4" TextWrapping="Wrap" />
                                 <TextBlock Text="• High Priority for Errors: Failure alerts are sent with urgent priority so you know immediately if a drive is offline or full." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Section 4: Self-Hosted & Custom Domains -->
+                <Border Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="🌐  4. Self-Hosted Servers &amp; Custom Domains" FontSize="14" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,0,8" />
+                        <TextBlock Text="Running your own ntfy server (e.g. Docker, Hyper-V, or Cloudflare Tunnel)? FopherSync seamlessly supports private custom domains with token authentication:" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
+
+                        <Border Background="{StaticResource BgDarkBrush}" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="• Step 1: Set Server URL in FopherSync" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,0,2" />
+                                <TextBlock Text="  Replace https://ntfy.sh with your public domain (for example: https://ntfy.fopher.net)." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+                                <TextBlock Text="• Step 2: Configure Scoped Access Token" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,0,2" />
+                                <TextBlock Text="  If your server enforces 'deny-all' access control, generate an API token for your bot user ('ntfy token add &lt;user&gt;') and paste the resulting token (tk_...) into FopherSync. It is securely encrypted using Windows DPAPI." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+                                <TextBlock Text="• Step 3: Configure Your Phone App" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,0,2" />
+                                <TextBlock Text="  In the ntfy mobile app Settings, set 'Default server' to your domain (e.g. https://ntfy.fopher.net) and use 'Manage users' to log into your account before subscribing to your topic." FontSize="12" Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
                     </StackPanel>

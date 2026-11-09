@@ -116,6 +116,7 @@ public class ConfigService
                     // Decrypt DPAPI-encrypted passwords into in-memory plaintext
                     settings.RemoteServer.ServerPassword = DpapiHelper.Unprotect(settings.RemoteServer.ServerPassword);
                     settings.Notifications.SmtpPassword = DpapiHelper.Unprotect(settings.Notifications.SmtpPassword);
+                    settings.Notifications.NtfyToken = DpapiHelper.Unprotect(settings.Notifications.NtfyToken);
 
                     if (string.IsNullOrEmpty(settings.LogDirectory))
                         settings.LogDirectory = DefaultLogDirectory;
@@ -141,11 +142,13 @@ public class ConfigService
         // Temporarily encrypt passwords for disk serialization
         var rawServerPass = settings.RemoteServer.ServerPassword;
         var rawSmtpPass = settings.Notifications.SmtpPassword;
+        var rawNtfyToken = settings.Notifications.NtfyToken;
 
         try
         {
             settings.RemoteServer.ServerPassword = DpapiHelper.Protect(rawServerPass);
             settings.Notifications.SmtpPassword = DpapiHelper.Protect(rawSmtpPass);
+            settings.Notifications.NtfyToken = DpapiHelper.Protect(rawNtfyToken);
 
             var json = JsonSerializer.Serialize(settings, JsonOptions);
             var tempFile = SettingsFilePath + ".tmp";
@@ -157,6 +160,7 @@ public class ConfigService
             // Restore in-memory plain text passwords immediately
             settings.RemoteServer.ServerPassword = rawServerPass;
             settings.Notifications.SmtpPassword = rawSmtpPass;
+            settings.Notifications.NtfyToken = rawNtfyToken;
         }
     }
 }

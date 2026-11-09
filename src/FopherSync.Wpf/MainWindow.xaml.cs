@@ -279,8 +279,15 @@ public partial class MainWindow : Window
 
         if (_settings.SleepAfterComplete)
         {
-            var sleepDialog = new SleepCountdownDialog("All Scheduled Backups");
-            sleepDialog.Show();
+            if (PowerService.IsWithinPreventSleepHours(_settings))
+            {
+                AppendConsoleLine($"[POWER] Automatic sleep suppressed: Current time is within quiet hours ({PowerService.FormatPreventSleepWindow(_settings)}).");
+            }
+            else
+            {
+                var sleepDialog = new SleepCountdownDialog("All Scheduled Backups");
+                sleepDialog.Show();
+            }
         }
     }
 
@@ -347,8 +354,15 @@ public partial class MainWindow : Window
 
         if (!isDryRun && job.SleepAfterComplete)
         {
-            var sleepDialog = new SleepCountdownDialog(job.Name);
-            sleepDialog.Show();
+            if (PowerService.IsWithinPreventSleepHours(_settings))
+            {
+                AppendConsoleLine($"[POWER] Automatic sleep suppressed for '{job.Name}': Current time is within quiet hours ({PowerService.FormatPreventSleepWindow(_settings)}).");
+            }
+            else
+            {
+                var sleepDialog = new SleepCountdownDialog(job.Name);
+                sleepDialog.Show();
+            }
         }
     }
 
@@ -773,6 +787,22 @@ public partial class MainWindow : Window
                 CmbSchedMinute.Items.Add(new ComboBoxItem { Content = m.ToString("D2") });
             }
         }
+
+        if (CmbPreventSleepStartMinute != null && CmbPreventSleepStartMinute.Items.Count == 0)
+        {
+            for (int m = 0; m < 60; m++)
+            {
+                CmbPreventSleepStartMinute.Items.Add(new ComboBoxItem { Content = m.ToString("D2") });
+            }
+        }
+
+        if (CmbPreventSleepEndMinute != null && CmbPreventSleepEndMinute.Items.Count == 0)
+        {
+            for (int m = 0; m < 60; m++)
+            {
+                CmbPreventSleepEndMinute.Items.Add(new ComboBoxItem { Content = m.ToString("D2") });
+            }
+        }
     }
 
     private void InitTimeZoneControls()
@@ -825,6 +855,35 @@ public partial class MainWindow : Window
         ChkGlobalCatchupIfMissed.IsChecked = _settings.CatchupIfMissed;
         ChkGlobalSleepAfterComplete.IsChecked = _settings.SleepAfterComplete;
 
+        if (PanelSleepOptions != null)
+            PanelSleepOptions.Visibility = _settings.SleepAfterComplete ? Visibility.Visible : Visibility.Collapsed;
+
+        ChkPreventSleepBetweenHours.IsChecked = _settings.PreventSleepBetweenHours;
+        if (PanelPreventSleepTimes != null)
+            PanelPreventSleepTimes.Visibility = _settings.PreventSleepBetweenHours ? Visibility.Visible : Visibility.Collapsed;
+
+        var startTime = _settings.PreventSleepStart;
+        int startH24 = startTime.Hours;
+        int startM = startTime.Minutes;
+        bool startIsPm = startH24 >= 12;
+        int startH12 = startH24 % 12;
+        if (startH12 == 0) startH12 = 12;
+        SelectComboBoxItem(CmbPreventSleepStartHour, startH12.ToString("D2"));
+        SelectComboBoxItem(CmbPreventSleepStartMinute, startM.ToString("D2"));
+        if (CmbPreventSleepStartAmPm != null) CmbPreventSleepStartAmPm.SelectedIndex = startIsPm ? 1 : 0;
+
+        var endTime = _settings.PreventSleepEnd;
+        int endH24 = endTime.Hours;
+        int endM = endTime.Minutes;
+        bool endIsPm = endH24 >= 12;
+        int endH12 = endH24 % 12;
+        if (endH12 == 0) endH12 = 12;
+        SelectComboBoxItem(CmbPreventSleepEndHour, endH12.ToString("D2"));
+        SelectComboBoxItem(CmbPreventSleepEndMinute, endM.ToString("D2"));
+        if (CmbPreventSleepEndAmPm != null) CmbPreventSleepEndAmPm.SelectedIndex = endIsPm ? 1 : 0;
+
+        UpdatePreventSleepPreview();
+
         var rs = _settings.RemoteServer;
         ChkRemoteWakeEnabled.IsChecked = rs.WakeOnLanEnabled;
         EdtServerHost.Text = rs.ServerHostName ?? string.Empty;
@@ -842,7 +901,13 @@ public partial class MainWindow : Window
 
         var n = _settings.Notifications;
         ChkNtfyEnabled.IsChecked = n.NtfyEnabled;
+        EdtNtfyServerUrl.Text = string.IsNullOrWhiteSpace(n.NtfyServerUrl) ? "https://ntfy.sh" : n.NtfyServerUrl;
         EdtNtfyTopic.Text = n.NtfyTopic;
+        EdtNtfyTokenPass.Password = n.NtfyToken ?? "";
+        EdtNtfyTokenText.Text = n.NtfyToken ?? "";
+        EdtNtfyTokenPass.Visibility = Visibility.Visible;
+        EdtNtfyTokenText.Visibility = Visibility.Collapsed;
+        BtnToggleNtfyToken.Content = "👁 Show";
 
         ChkDiscordEnabled.IsChecked = n.DiscordEnabled;
         EdtDiscordWebhook.Text = n.DiscordWebhookUrl;
@@ -923,6 +988,39 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnGlobalSleepAfterCompleteChanged(object sender, RoutedEventArgs e)
+    {
+        if (PanelSleepOptions == null) return;
+        PanelSleepOptions.Visibility = ChkGlobalSleepAfterComplete.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void OnPreventSleepBetweenHoursChanged(object sender, RoutedEventArgs e)
+    {
+        if (PanelPreventSleepTimes == null) return;
+        PanelPreventSleepTimes.Visibility = ChkPreventSleepBetweenHours.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void OnPreventSleepTimeChanged(object sender, SelectionChangedEventArgs e)
+    {
+        UpdatePreventSleepPreview();
+    }
+
+    private void UpdatePreventSleepPreview()
+    {
+        if (TxtPreventSleepPreview == null || CmbPreventSleepStartHour == null || CmbPreventSleepStartMinute == null || CmbPreventSleepStartAmPm == null ||
+            CmbPreventSleepEndHour == null || CmbPreventSleepEndMinute == null || CmbPreventSleepEndAmPm == null) return;
+
+        var sHStr = (CmbPreventSleepStartHour.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "08";
+        var sMStr = (CmbPreventSleepStartMinute.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "00";
+        var sAmPm = CmbPreventSleepStartAmPm.SelectedIndex == 1 ? "PM" : "AM";
+
+        var eHStr = (CmbPreventSleepEndHour.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "06";
+        var eMStr = (CmbPreventSleepEndMinute.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "00";
+        var eAmPm = CmbPreventSleepEndAmPm.SelectedIndex == 1 ? "PM" : "AM";
+
+        TxtPreventSleepPreview.Text = $"(Stays awake {sHStr}:{sMStr} {sAmPm} – {eHStr}:{eMStr} {eAmPm})";
+    }
+
     private static void SelectComboBoxItem(ComboBox? combo, string text)
     {
         if (combo == null) return;
@@ -958,6 +1056,25 @@ public partial class MainWindow : Window
         _settings.WakeToRun = ChkGlobalWakeToRun.IsChecked == true;
         _settings.CatchupIfMissed = ChkGlobalCatchupIfMissed.IsChecked == true;
         _settings.SleepAfterComplete = ChkGlobalSleepAfterComplete.IsChecked == true;
+        _settings.PreventSleepBetweenHours = ChkPreventSleepBetweenHours.IsChecked == true;
+
+        var sHStr = (CmbPreventSleepStartHour?.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "08";
+        var sMStr = (CmbPreventSleepStartMinute?.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "00";
+        int.TryParse(sHStr, out int sH12);
+        int.TryParse(sMStr, out int sMinute);
+        bool sIsPm = CmbPreventSleepStartAmPm?.SelectedIndex == 1;
+        int sH24 = sH12 % 12;
+        if (sIsPm) sH24 += 12;
+        _settings.PreventSleepStart = new TimeSpan(sH24, sMinute, 0);
+
+        var eHStr = (CmbPreventSleepEndHour?.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "06";
+        var eMStr = (CmbPreventSleepEndMinute?.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "00";
+        int.TryParse(eHStr, out int eH12);
+        int.TryParse(eMStr, out int eMinute);
+        bool eIsPm = CmbPreventSleepEndAmPm?.SelectedIndex == 1;
+        int eH24 = eH12 % 12;
+        if (eIsPm) eH24 += 12;
+        _settings.PreventSleepEnd = new TimeSpan(eH24, eMinute, 0);
 
         var rs = _settings.RemoteServer;
         rs.WakeOnLanEnabled = ChkRemoteWakeEnabled.IsChecked == true;
@@ -971,7 +1088,9 @@ public partial class MainWindow : Window
 
         var n = _settings.Notifications;
         n.NtfyEnabled = ChkNtfyEnabled.IsChecked == true;
+        n.NtfyServerUrl = string.IsNullOrWhiteSpace(EdtNtfyServerUrl.Text) ? "https://ntfy.sh" : EdtNtfyServerUrl.Text.Trim();
         n.NtfyTopic = EdtNtfyTopic.Text.Trim();
+        n.NtfyToken = GetNtfyTokenFromUi();
 
         n.DiscordEnabled = ChkDiscordEnabled.IsChecked == true;
         n.DiscordWebhookUrl = EdtDiscordWebhook.Text.Trim();
@@ -1019,6 +1138,36 @@ public partial class MainWindow : Window
         MessageBox.Show("Settings saved and master schedule synced with Windows Task Scheduler!", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
+    private void OnResetNtfyServerUrlClick(object sender, RoutedEventArgs e)
+    {
+        EdtNtfyServerUrl.Text = "https://ntfy.sh";
+    }
+
+    private void OnToggleNtfyTokenVisibilityClick(object sender, RoutedEventArgs e)
+    {
+        if (EdtNtfyTokenPass.Visibility == Visibility.Visible)
+        {
+            EdtNtfyTokenText.Text = EdtNtfyTokenPass.Password;
+            EdtNtfyTokenPass.Visibility = Visibility.Collapsed;
+            EdtNtfyTokenText.Visibility = Visibility.Visible;
+            BtnToggleNtfyToken.Content = "🔒 Hide";
+        }
+        else
+        {
+            EdtNtfyTokenPass.Password = EdtNtfyTokenText.Text;
+            EdtNtfyTokenText.Visibility = Visibility.Collapsed;
+            EdtNtfyTokenPass.Visibility = Visibility.Visible;
+            BtnToggleNtfyToken.Content = "👁 Show";
+        }
+    }
+
+    private string GetNtfyTokenFromUi()
+    {
+        return EdtNtfyTokenText.Visibility == Visibility.Visible
+            ? EdtNtfyTokenText.Text.Trim()
+            : EdtNtfyTokenPass.Password.Trim();
+    }
+
     private void OnNtfyHelpClick(object sender, RoutedEventArgs e)
     {
         var helpGuide = new NtfyHelpGuideWindow();
@@ -1051,10 +1200,15 @@ public partial class MainWindow : Window
             return;
         }
 
+        var serverUrl = string.IsNullOrWhiteSpace(EdtNtfyServerUrl.Text) ? "https://ntfy.sh" : EdtNtfyServerUrl.Text.Trim();
+        var token = GetNtfyTokenFromUi();
+
         var ntfy = new NtfyNotifier(new NotificationSettings
         {
             NtfyEnabled = true,
-            NtfyTopic = topic
+            NtfyServerUrl = serverUrl,
+            NtfyTopic = topic,
+            NtfyToken = token
         });
 
         var (success, msg) = await ntfy.SendTestNotificationAsync();
